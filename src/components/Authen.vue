@@ -13,15 +13,16 @@ export function useAuth() {
 
   const logout = () => {
     localStorage.removeItem('isAuthenticated')
+    localStorage.removeItem('token')
     isAuthenticated.value = false
   }
 
-  // ตรวจสอบ auth state เมื่อ initialize
   const checkAuth = () => {
-    isAuthenticated.value = !!localStorage.getItem('isAuthenticated')
+    const token = localStorage.getItem('token')
+    isAuthenticated.value = !!token
   }
 
-  // เรียกใช้ทันทีเมื่อ import
+  // Call immediately when imported
   checkAuth()
 
   return {

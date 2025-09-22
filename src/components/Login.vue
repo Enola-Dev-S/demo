@@ -9,7 +9,7 @@
 
       <form @submit.prevent="handleLogin" class="space-y-6 text-white">
         <div>
-          <label class="block text-sm font-medium text-white">Email/Username</label>
+          <label class="block text-sm font-medium text-white">Email</label>
           <div class="mt-1 relative">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -17,14 +17,14 @@
               </svg>
             </span>
             <input
-              v-model="username"
+              v-model="email"
               type="text"
               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-              :class="{ 'border-red-500': errors.username }"
+              :class="{ 'border-red-500': errors.email }"
               placeholder="Enter your email or username"
             >
           </div>
-          <p v-if="errors.username" class="mt-1 text-sm text-red-600">{{ errors.username }}</p>
+          <p v-if="errors.email" class="mt-1 text-sm text-red-600">{{ errors.email }}</p>
         </div>
 
         <div>
@@ -48,9 +48,8 @@
 
         <div>
           <button
-            type="submit"
-            class="button-Login">
-            Login
+            type="submit" class="button-Login" :disabled="loading">
+            {{loading ? 'Logging in...' : 'Login'}}
           </button>
         </div>
       </form>
@@ -62,30 +61,65 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/components/Authen.vue'
+import { log } from 'console'
 
 const router = useRouter()
 const { login } = useAuth()
-const username = ref('')
-const password = ref('')
+const email = ref('test@example.com')
+const password = ref('123sad!@#^&456')
 const errors = reactive({
-  username: '',
+  email: '',
   password: ''
 })
+const loading = ref(false)
 
-const handleLogin = () => {
-  errors.username = ''
+interface LoginResponse {
+  success: boolean;
+  message: string;
+  token?: string;
+}
+const handleLogin = async () => {
+  errors.email = ''
   errors.password = ''
+  loading.value = true
 
-  if (!username.value || !password.value) {
+  if (!email.value || !password.value) {
     errors.password = 'Please enter both username and password'
+    loading.value = false
     return
   }
 
-  if (username.value === 'admin' && password.value === 'admin') {
-    login() // ใช้ฟังก์ชัน login จาก composable
-    router.push('/')
-  } else {
-    errors.password = 'Invalid username or password'
+  try {
+    const response = await fetch('http://localhost:3000/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value
+      })
+    });
+
+    const data: LoginResponse = await response.json();
+
+    if (data.success) {
+      // Store token if provided
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        console.log('Token stored:', data.token);
+      }
+      login();
+      router.push('/');
+    } else {
+      errors.password = data.message || 'Invalid username or password';
+    }
+  } catch (error) {
+    errors.password = 'Failed to connect to server';
+    console.error('Login error:', error);
+  } finally {
+    loading.value = false
   }
 }
+
 </script>

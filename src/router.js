@@ -2,30 +2,37 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from './components/Login.vue'
 import About from './components/About.vue'
 import Home from './components/Home.vue'
+import Dashboard from './components/Dashboard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: "/",
       component: Home,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/login',
-      component: Login
+      path: "/login",
+      component: Login,
     },
     {
-      path: '/about',
+      path: "/about",
       component: About,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/:pathMatch(.*)*',
-      redirect: '/'
+      path: "/dashboard",
+      name: "Dashboard",
+      component: Dashboard,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/:pathMatch(.*)*",
+      redirect: "/",
     },
   ],
-})
+});
 
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated')
