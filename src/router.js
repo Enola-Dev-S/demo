@@ -1,20 +1,23 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Login from './components/Login.vue'
-import About from './components/About.vue'
-import Home from './components/Home.vue'
-import Dashboard from './components/Dashboard.vue'
+import { createRouter, createWebHistory } from "vue-router";
+import Login from "./components/Login.vue";
+import About from "./components/About.vue";
+import Home from "./components/Home.vue";
+import Dashboard from "./components/Dashboard.vue";
+import Administrator from "./components/Administrator.vue";
+import { useAuth } from "./components/Authen.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: "/login",
+      name: "Login",
+      component: Login,
+    },
+    {
       path: "/",
       component: Home,
       meta: { requiresAuth: true },
-    },
-    {
-      path: "/login",
-      component: Login,
     },
     {
       path: "/about",
@@ -28,6 +31,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: "/administrator",
+      name: "Administrator",
+      component: Administrator,
+      meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
       path: "/:pathMatch(.*)*",
       redirect: "/",
     },
@@ -35,15 +44,18 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated')
+  const isAuthenticated = localStorage.getItem("isAuthenticated");
+  const userRole = localStorage.getItem("userRole");
 
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login')
-  } else if (to.path === '/login' && isAuthenticated) {
-    next('/')
+    next("/login");
+  } else if (to.meta.requiresAdmin && userRole !== "administrator") {
+    next("/"); // Redirect non-admin users to home
+  } else if (to.path === "/login" && isAuthenticated) {
+    next("/");
   } else {
-    next()
+    next();
   }
-})
+});
 
-export default router
+export default router;
