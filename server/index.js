@@ -3,13 +3,21 @@ import cors from 'cors'
 import mysql from 'mysql2/promise'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import chalk from 'chalk'
 import { dbConfig, jwtSecret } from './dbconfig.js'
+import createCarRouter from './car.js'
+import path from 'path'
 
 const app = express()
 
 // Middleware
 app.use(cors())
 app.use(express.json())
+
+app.use((req, res, next) => {
+  console.log(chalk.cyan(`${req.method} ${req.url}`));
+  next();
+});
 
 // Create database connection pool
 const pool = mysql.createPool(dbConfig)
@@ -18,13 +26,19 @@ const pool = mysql.createPool(dbConfig)
 async function test() {
   try {
     const [rows] = await pool.execute('select count(*) as count from user');
-    console.log('Database connection test result:', rows);
+    console.log(chalk.green('Database connection test result:'), rows);
   } catch (err) {
-    console.error('Database connection error:', err);
+    console.error(chalk.red('Error Database connection:'), err);
   }
 }
 
 test();
+
+// mount car router
+app.use('/api/car', createCarRouter(pool))
+
+// serve uploaded images
+app.use('/imgcar', express.static('D:\\Dev\\imgcar'))
 
 // Routes
 app.get('/', (req, res) => {
@@ -71,6 +85,7 @@ app.post('/api/login', async (req, res) => {
       token,
       user: {
         id: user.id,
+        name: user.name, // Add this line
         email: user.email,
         role: user.role
       }
@@ -85,11 +100,63 @@ app.post('/api/login', async (req, res) => {
   }
 })
 
+// Add new user
+app.post('/api/adduser', async (req, res) => {
+  const { name, email, password, role } = req.body
+
+  try {
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'กรุณากรอกข้อมูลให้ครบถ้วน'
+      })
+    }
+
+    // Check if email already exists
+    const [existing] = await pool.execute(
+      'SELECT id FROM user WHERE email = ?', 
+      [email]
+    )
+
+    if (existing.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'อีเมลนี้ถูกใช้งานแล้ว'
+      })
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
+
+    // Insert new user with name
+    const [result] = await pool.execute(
+      'INSERT INTO user (name, email, password, role) VALUES (?, ?, ?, ?)',
+      [ name, email, hashedPassword, role || 'user']
+    )
+
+    res.status(201).json({
+      success: true,
+      message: 'สร้างผู้ใช้สำเร็จ',
+      userId: result.insertId,
+      name: name
+    })
+
+  } catch (err) {
+    console.error(chalk.red('Add user error:'), err)
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการสร้างผู้ใช้'
+    })
+  }
+})
+
 // User Routes
 // Get all users
 app.get('/api/users', async (req, res) => {
   try {
-    const [rows] = await pool.execute('SELECT id, email, role FROM user')
+    const [rows] = await pool.execute('SELECT id, name ,email, role FROM user')
     res.json({
       success: true,
       data: rows
@@ -107,7 +174,7 @@ app.get('/api/users', async (req, res) => {
 app.get('/api/users/:id', async (req, res) => {
   try {
     const [rows] = await pool.execute(
-      'SELECT id, email, role FROM user WHERE id = ?',
+      'SELECT id, name, email, role FROM user WHERE id = ?', // Add name to SELECT
       [req.params.id]
     )
 
@@ -140,6 +207,11 @@ app.put('/api/users/:id', async (req, res) => {
     let sql = 'UPDATE user SET'
     const values = []
     const updateFields = []
+
+    if (updates.name) {  // Add this block
+      updateFields.push(' name = ?')
+      values.push(updates.name)
+    }
 
     if (updates.email) {
       updateFields.push(' email = ?')
@@ -199,5 +271,5 @@ app.delete('/api/users/:id', async (req, res) => {
 
 const port = process.env.PORT || 3000
 app.listen(port, () => {
-  console.log(`Server Start >> running on port ${port}`)
-})
+  console.log(chalk.blue(`Server Start >> Running on Port -- ${port}`));
+});

@@ -2,10 +2,19 @@
   "name": "demo",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
+  "description": "This template should help get you started developing with Vue 3 in Vite.",
+  "homepage": "https://github.com/Enola-Dev-S/demo#readme",
+  "bugs": {
+    "url": "https://github.com/Enola-Dev-S/demo/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Enola-Dev-S/demo.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run client\" \"npm run server\"",
     "server": "node server/index.js",
@@ -17,11 +26,13 @@
     "@popperjs/core": "^2.11.8",
     "@tailwindcss/vite": "^4.1.12",
     "bcryptjs": "^3.0.2",
+    "chalk": "^5.6.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.15.0",
+    "multer": "^2.0.2",
+    "mysql2": "^3.15.2",
     "tailwindcss": "^4.1.12",
     "v-calendar": "^3.1.2",
     "vue": "^3.5.18",
@@ -29,6 +40,7 @@
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
+    "@types/multer": "^2.0.0",
     "@types/node": "^22.16.5",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/eslint-config-typescript": "^14.6.0",
@@ -42,5 +54,8 @@
     "vite": "^7.0.6",
     "vite-plugin-vue-devtools": "^8.0.0",
     "vue-tsc": "^3.0.4"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

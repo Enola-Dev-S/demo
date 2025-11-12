@@ -19,7 +19,7 @@
                   stroke-width="2"
                   d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
                 />
-              </svg>  <!-- icon svg -->
+              </svg> <!-- icon svg -->
             </span>
             <input
               v-model="email"
@@ -88,9 +88,10 @@ interface LoginResponse {
   token?: string;
   user?: {
     email: string;
-    role: string;
+    role: string; // can be 'superadmin', 'administrator', or 'user'
   };
 }
+
 const handleLogin = async () => {
   errors.email = "";
   errors.password = "";
@@ -103,7 +104,7 @@ const handleLogin = async () => {
   }
 
   try {
-    const response = await fetch("http://localhost:3000/login", {
+    const response = await fetch("http://localhost:3000/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -117,20 +118,31 @@ const handleLogin = async () => {
     const data: LoginResponse = await response.json();
 
     if (data.success) {
-      // Store user data from API response
+      // Store user data
       localStorage.setItem("userEmail", email.value);
-      localStorage.setItem("userRole", data.user?.role || ''); // Get role from API
-
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-      }
+      localStorage.setItem("userRole", data.user?.role || "");
+      localStorage.setItem("token", data.token || "");
 
       login();
-      // Redirect based on role
-      if (data.user?.role === 'administrator') {
-        router.push("/administrator");
+
+      // If superadmin, allow access to both dashboards
+      if (data.user?.role === "superadmin") {
+        // Create menu array for superadmin navigation
+        localStorage.setItem("allowedRoutes", JSON.stringify([
+          "/superadmin",
+          "/administrator",
+          "/"
+        ]));
+        router.push("/superadmin"); // Default route for superadmin
       } else {
-        router.push("/");
+        // Normal role-based routing
+        switch (data.user?.role) {
+          case "administrator":
+            router.push("/administrator");
+            break;
+          default:
+            router.push("/");
+        }
       }
     } else {
       errors.password = data.message || "Invalid username or password";
