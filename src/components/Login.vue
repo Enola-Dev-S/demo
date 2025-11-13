@@ -75,11 +75,7 @@ const router = useRouter();
 const { login } = useAuth();
 const email = ref("test@example.com");
 const password = ref("123sad!@#^&456");
-const errors = reactive({
-  email: "",
-  password: "",
-  roll: "",
-});
+const errors = reactive({ email: "", password: "", roll: "" });
 const loading = ref(false);
 
 interface LoginResponse {
@@ -87,8 +83,10 @@ interface LoginResponse {
   message: string;
   token?: string;
   user?: {
-    email: string;
-    role: string; // can be 'superadmin', 'administrator', or 'user'
+    id?: number;
+    name?: string;
+    email?: string;
+    role?: string;
   };
 }
 
@@ -106,36 +104,27 @@ const handleLogin = async () => {
   try {
     const response = await fetch("http://localhost:3000/api/login", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: email.value,
-        password: password.value,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.value, password: password.value }),
     });
 
     const data: LoginResponse = await response.json();
 
     if (data.success) {
-      // Store user data
-      localStorage.setItem("userEmail", email.value);
+      // Store user data so Navbar and BookingCalendar can read them
+      localStorage.setItem("userEmail", data.user?.email || email.value);
       localStorage.setItem("userRole", data.user?.role || "");
-      localStorage.setItem("token", data.token || "");
+      if (data.user?.id !== undefined) localStorage.setItem("userId", String(data.user.id));
+      const username = data.user?.name || data.user?.email?.split?.('@')?.[0] || email.value.split('@')[0];
+      localStorage.setItem("username", username);
+      if (data.token) localStorage.setItem("token", data.token);
 
       login();
 
-      // If superadmin, allow access to both dashboards
       if (data.user?.role === "superadmin") {
-        // Create menu array for superadmin navigation
-        localStorage.setItem("allowedRoutes", JSON.stringify([
-          "/superadmin",
-          "/administrator",
-          "/"
-        ]));
-        router.push("/superadmin"); // Default route for superadmin
+        localStorage.setItem("allowedRoutes", JSON.stringify(["/superadmin", "/administrator", "/"]));
+        router.push("/superadmin");
       } else {
-        // Normal role-based routing
         switch (data.user?.role) {
           case "administrator":
             router.push("/administrator");

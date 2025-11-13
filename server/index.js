@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken'
 import chalk from 'chalk'
 import { dbConfig, jwtSecret } from './dbconfig.js'
 import createCarRouter from './car.js'
+import createBookingRouter from './booking.js'
 import path from 'path'
 
 const app = express()
@@ -36,6 +37,8 @@ test();
 
 // mount car router
 app.use('/api/car', createCarRouter(pool))
+// mount booking router
+app.use('/api/booking', createBookingRouter(pool))
 
 // serve uploaded images
 app.use('/imgcar', express.static('D:\\Dev\\imgcar'))
@@ -270,6 +273,7 @@ app.delete('/api/users/:id', async (req, res) => {
 })
 
 const port = process.env.PORT || 3000
-app.listen(port, () => {
+// ให้ฟังที่ 0.0.0.0 แทน localhost
+app.listen(port, '0.0.0.0', () => {
   console.log(chalk.blue(`Server Start >> Running on Port -- ${port}`));
 });

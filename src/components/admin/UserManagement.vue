@@ -6,6 +6,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  password?: string; // added
 }
 
 const users = ref<User[]>([]);
@@ -14,81 +15,107 @@ const showForm = ref(false);
 const formData = ref<User>({
   name: '',
   email: '',
-  role: 'user'
+  role: 'user',
+  password: '' // added
 });
 
-const roles = ['user', 'admin'];
+const roles = ['user', 'administrator', 'superadmin'];
+const apiBase = 'http://localhost:3000'; // server base
 
-const handleSubmit = async () => {
+const loadUsers = async () => {
   try {
-    if (editingUser.value) {
-      // Update existing user
-      await fetch(`http://localhost:3000/users/${editingUser.value.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData.value)
-      });
-    } else {
-      // Create new user
-      await fetch('http://localhost:3000/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData.value)
-      });
+    const res = await fetch(`${apiBase}/api/users`);
+    const data = await res.json();
+    if (data.success) users.value = data.data;
+    else {
+      console.error('Load users failed', data);
+      users.value = [];
     }
-    await loadUsers();
-    resetForm();
-  } catch (error) {
-    console.error('Error:', error);
-  }
-};
-
-const editUser = (user: User) => {
-  editingUser.value = user;
-  formData.value = { ...user };
-  showForm.value = true;
-};
-
-const deleteUser = async (id: number) => {
-  if (confirm('Are you sure you want to delete this user?')) {
-    try {
-      await fetch(`http://localhost:3000/users/${id}`, {
-        method: 'DELETE'
-      });
-      await loadUsers();
-    } catch (error) {
-      console.error('Error:', error);
-    }
+  } catch (err) {
+    console.error('Load users error', err);
+    users.value = [];
   }
 };
 
 const resetForm = () => {
-  formData.value = {
-    name: '',
-    email: '',
-    role: 'user'
-  };
-  editingUser.value = null;
-  showForm.value = false;
-};
+  formData.value = { name: '', email: '', role: 'user', password: '' }
+  editingUser.value = null
+  showForm.value = false
+}
 
-const loadUsers = async () => {
+const handleSubmit = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/users');
-    const data = await response.json();
-    if (data.success) {
-      users.value = data.data; // Assuming API returns { success: true, data: [...users] }
+    if (editingUser.value && editingUser.value.id) {
+      // Update user - send password only if provided
+      const payload: any = {
+        name: formData.value.name,
+        email: formData.value.email,
+        role: formData.value.role
+      }
+      if (formData.value.password && formData.value.password.trim() !== '') {
+        payload.password = formData.value.password
+      }
+      const res = await fetch(`${apiBase}/api/users/${editingUser.value.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Update failed')
     } else {
-      console.error('Failed to load users:', data.message);
+      // Add new user - password required
+      const res = await fetch(`${apiBase}/api/adduser`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.value.name,
+          email: formData.value.email,
+          role: formData.value.role,
+          password: formData.value.password
+        })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Create failed')
     }
-  } catch (error) {
-    console.error('Error loading users:', error);
+    await loadUsers()
+    resetForm()
+  } catch (err: any) {
+    console.error(err)
+    alert(err.message || 'เกิดข้อผิดพลาด')
   }
+}
+
+const editUser = (user: User) => {
+  editingUser.value = user;
+  formData.value = { name: user.name, email: user.email, role: user.role, password: '' } // clear password
+  showForm.value = true;
 };
 
-onMounted(() => {
-  loadUsers();
-});
+const showDeleteModal = ref(false)
+const deleteTarget = ref<User | null>(null)
+
+const openDeleteModal = (user: User) => {
+  deleteTarget.value = user
+  showDeleteModal.value = true
+}
+
+const doDelete = async () => {
+  if (!deleteTarget.value?.id) return
+  try {
+    const res = await fetch(`${apiBase}/api/users/${deleteTarget.value.id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.message || 'Delete failed')
+    }
+    showDeleteModal.value = false
+    await loadUsers()
+  } catch (err: any) {
+    console.error(err)
+    alert(err.message || 'เกิดข้อผิดพลาด')
+  }
+}
+
+onMounted(() => loadUsers());
 </script>
 
 <template>
@@ -127,6 +154,22 @@ onMounted(() => {
             required
           />
         </div>
+
+        <!-- New password input -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">
+            Password
+            <span class="text-xs text-gray-500">({{ editingUser ? 'leave blank to keep current' : 'required' }})</span>
+          </label>
+          <input
+            v-model="formData.password"
+            :required="!editingUser"
+            type="password"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+            minlength="6"
+          />
+        </div>
+
         <div>
           <label class="block text-sm font-medium text-gray-700">Role</label>
           <select 
@@ -138,6 +181,7 @@ onMounted(() => {
             </option>
           </select>
         </div>
+
         <div class="flex space-x-4">
           <button 
             type="submit"
@@ -189,7 +233,7 @@ onMounted(() => {
                 Edit
               </button>
               <button 
-                @click="deleteUser(user.id!)"
+                @click="openDeleteModal(user)"
                 class="inline-flex items-center px-3 py-1.5 border border-red-600 text-red-600 
                        rounded-md hover:bg-red-50 transition-colors duration-200"
               >
@@ -203,5 +247,33 @@ onMounted(() => {
         </tbody>
       </table>
     </div>
+
+    <!-- Delete confirmation modal -->
+    <transition name="modal" appear>
+      <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="fixed inset-0 bg-black/40" @click="showDeleteModal = false"></div>
+        <div class="bg-white rounded-lg shadow-xl z-50 w-full max-w-md mx-4 p-6">
+          <div class="flex items-start space-x-4">
+            <div class="flex-shrink-0">
+              <svg class="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m2 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold">Confirm delete</h3>
+              <p class="text-sm text-gray-600 mt-1">
+                ต้องการลบผู้ใช้
+                <span class="font-medium" v-if="deleteTarget">{{ deleteTarget.name }}</span>
+                หรือไม่? การกระทำนี้ไม่สามารถยกเลิกได้
+              </p>
+              <div class="mt-4 flex justify-end space-x-3">
+                <button @click="showDeleteModal = false" class="px-4 py-2 rounded bg-gray-100 hover:bg-gray-200">Cancel</button>
+                <button @click="doDelete" class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
