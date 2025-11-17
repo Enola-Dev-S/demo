@@ -143,6 +143,7 @@
 <script setup lang="ts">
 import { auto } from '@popperjs/core'
 import { ref, onMounted } from 'vue'
+import { API_BASE } from "@/config";
 
 interface Car {
   id?: number
@@ -169,9 +170,9 @@ const formData = ref<Car>({
   img: ''
 })
 
-const statuses = ['available', 'maintenance', 'booked']
-const apiBase = 'http://localhost:3000/api/car'
-const serverBase = 'http://localhost:3000'
+const statuses = ['Available', 'Maintenance']
+const apiBase = API_BASE+'/api/car'
+const serverBase = API_BASE
 const fileInput = ref<HTMLInputElement | null>(null)
 const previewWidth = ref<number>(800)   // ปรับเป็นขนาดที่ต้องการ
 const previewHeight = ref<number>(800)  // ปรับเป็นขนาดที่ต้องการ

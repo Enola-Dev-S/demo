@@ -5,7 +5,8 @@
 </template>
 
 <script setup lang="ts">
-import BookingCalendar from '@/components/BookingCalendar.vue'
+import BookingCalendar from '@/components/BookingWeekly.vue'
+//import BookingCalendar from '@/components/Bookingcalendar.vue'
 </script>
 
 <style scoped>

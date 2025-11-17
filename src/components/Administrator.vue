@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import UserManagement from './admin/UserManagement.vue';
 import CarManagement from './admin/CarManagement.vue';
 
-const activeMenu = ref('users'); // default to users view
+const activeMenu = ref('cars'); // default to users view
 </script>
 
 <template>
@@ -15,18 +15,18 @@ const activeMenu = ref('users'); // default to users view
       </div>
       <nav class="mt-4">
         <button
-          @click="activeMenu = 'users'"
-          :class="['w-full text-left p-4 hover:bg-gray-700',
-                  activeMenu === 'users' ? 'bg-gray-700' : '']"
-        >
-          User Management
-        </button>
-        <button
           @click="activeMenu = 'cars'"
           :class="['w-full text-left p-4 hover:bg-gray-700',
                   activeMenu === 'cars' ? 'bg-gray-700' : '']"
         >
           Car Management
+        </button>
+        <button
+          @click="activeMenu = 'users'"
+          :class="['w-full text-left p-4 hover:bg-gray-700',
+                  activeMenu === 'users' ? 'bg-gray-700' : '']"
+        >
+          User Management
         </button>
       </nav>
     </div>

@@ -1,13 +1,12 @@
 <template>
   <div class="min-h-screen bg-gray-50 p-6">
-   <h1 class="text-2xl font-bold mb-4">Home Page</h1>
-    
-    <!-- <BookingCalendar /> -->
+    <BookingCalendar />
   </div>
 </template>
 
 <script setup lang="ts">
-// import BookingCalendar from '@/components/BookingCalendar.vue'
+import BookingCalendar from '@/components/BookingWeekly.vue'
+//import BookingCalendar from '@/components/Bookingcalendar.vue'
 </script>
 
 <style scoped>

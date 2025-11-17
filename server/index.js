@@ -8,6 +8,7 @@ import { dbConfig, jwtSecret } from './dbconfig.js'
 import createCarRouter from './car.js'
 import createBookingRouter from './booking.js'
 import path from 'path'
+import config from './config.js'
 
 const app = express()
 
@@ -272,8 +273,8 @@ app.delete('/api/users/:id', async (req, res) => {
   }
 })
 
-const port = process.env.PORT || 3000
-// ให้ฟังที่ 0.0.0.0 แทน localhost
+const port = config.port || 3000
+// bind to all interfaces so both localhost and LAN IP (10.10.11.114) จะเข้าถึงได้
 app.listen(port, '0.0.0.0', () => {
-  console.log(chalk.blue(`Server Start >> Running on Port -- ${port}`));
-});
+  console.log(`Server listening on http://localhost:${port} and on all interfaces (http://<your-ip>:${port})`)
+})

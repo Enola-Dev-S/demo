@@ -5,13 +5,16 @@ export default function createBookingRouter(pool) {
   const TABLE = 'car_booking'
 
   // helper: check overlap (returns true if conflict)
-  async function hasOverlap(car_id, start_dt, end_dt) {
-    const [rows] = await pool.execute(
-      `SELECT COUNT(*) as cnt FROM ${TABLE}
+  async function hasOverlap(car_id, start_dt, end_dt, excludeId = null) {
+    let sql = `SELECT COUNT(*) as cnt FROM ${TABLE}
        WHERE car_id = ? AND status != 'cancelled'
-         AND NOT (end_datetime <= ? OR start_datetime >= ?)`,
-      [car_id, start_dt, end_dt]
-    )
+         AND NOT (end_datetime <= ? OR start_datetime >= ?)`
+    const vals = [car_id, start_dt, end_dt]
+    if (excludeId !== null && excludeId !== undefined) {
+      sql += ' AND id != ?'
+      vals.push(excludeId)
+    }
+    const [rows] = await pool.execute(sql, vals)
     return rows[0].cnt > 0
   }
 
@@ -41,7 +44,7 @@ export default function createBookingRouter(pool) {
       res.json({ success: true, data: rows })
     } catch (err) {
       console.error('Get bookings error:', err)
-      res.status(500).json({ success: false, message: 'Database query error' })
+      res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' })
     }
   })
 
@@ -49,52 +52,94 @@ export default function createBookingRouter(pool) {
   router.post('/', async (req, res) => {
     try {
       console.log('POST /api/booking body:', req.body) // เพิ่ม log เพื่อตรวจสอบค่าที่มาจริง
-      const { car_id, user_id, start_datetime, end_datetime, purpose, destination } = req.body
+      const {
+        car_id,
+        user_id,
+        start_datetime,
+        end_datetime,
+        purpose,
+        destination,
+        status: rawStatus
+      } = req.body
 
       // validate
       if (!car_id || !user_id || !start_datetime || !end_datetime) {
-        return res.status(400).json({ success: false, message: 'Missing required fields' })
+        return res.status(400).json({ success: false, message: 'ข้อมูลที่จำเป็นไม่ครบถ้วน' })
       }
 
       const carIdNum = Number(car_id)
       const userIdNum = Number(user_id)
       if (isNaN(carIdNum) || isNaN(userIdNum)) {
-        return res.status(400).json({ success: false, message: 'car_id and user_id must be numbers' })
+        return res.status(400).json({ success: false, message: 'car_id และ user_id ต้องเป็นตัวเลข' })
       }
 
       if (new Date(start_datetime) >= new Date(end_datetime)) {
-        return res.status(400).json({ success: false, message: 'Invalid datetime range' })
+        return res.status(400).json({ success: false, message: 'ช่วงวันที่/เวลาไม่ถูกต้อง' })
       }
       const conflict = await hasOverlap(car_id, start_datetime, end_datetime)
-      if (conflict) return res.status(409).json({ success: false, message: 'Time slot conflicts with existing booking' })
+      if (conflict) return res.status(409).json({ success: false, message: 'ช่วงเวลานี้ชนกับการจองที่มีอยู่แล้ว' })
+
+      const allowedStatuses = ['pending','approved','rejected','completed','cancelled']
+      const status = allowedStatuses.includes(rawStatus) ? rawStatus : 'approved'
 
       const [result] = await pool.execute(
         `INSERT INTO ${TABLE} (car_id, user_id, start_datetime, end_datetime, purpose, destination, status)
-         VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
-        [car_id, user_id, start_datetime, end_datetime, purpose || null, destination || null]
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [car_id, user_id, start_datetime, end_datetime, purpose || null, destination || null, status]
       )
       res.status(201).json({ success: true, id: result.insertId })
     } catch (err) {
       console.error('Create booking error:', err)
-      res.status(500).json({ success: false, message: 'Database insert error' })
+      res.status(500).json({ success: false, message: 'บันทึกข้อมูลลงฐานข้อมูลไม่สำเร็จ' })
     }
   })
 
-  // PUT /api/booking/:id  - update status (approve/reject/complete)
+  // PUT /api/booking/:id  - update booking fields/status
   router.put('/:id', async (req, res) => {
     try {
-      const id = req.params.id
-      const { status } = req.body
-      if (!status) return res.status(400).json({ success: false, message: 'Missing status' })
-      const allowed = ['pending','approved','rejected','completed','cancelled']
-      if (!allowed.includes(status)) return res.status(400).json({ success: false, message: 'Invalid status' })
+      const id = Number(req.params.id)
+      if (Number.isNaN(id)) return res.status(400).json({ success: false, message: 'รหัสการจองไม่ถูกต้อง' })
 
-      const [result] = await pool.execute(`UPDATE ${TABLE} SET status = ? WHERE id = ?`, [status, id])
-      if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'Not found' })
-      res.json({ success: true, message: 'Updated' })
+      const {
+        car_id,
+        user_id,
+        start_datetime,
+        end_datetime,
+        purpose,
+        destination,
+        status: rawStatus
+      } = req.body
+
+      if (!car_id || !user_id || !start_datetime || !end_datetime || !rawStatus) {
+        return res.status(400).json({ success: false, message: 'ข้อมูลที่จำเป็นไม่ครบถ้วน' })
+      }
+
+      const carIdNum = Number(car_id)
+      const userIdNum = Number(user_id)
+      if (Number.isNaN(carIdNum) || Number.isNaN(userIdNum)) {
+        return res.status(400).json({ success: false, message: 'car_id และ user_id ต้องเป็นตัวเลข' })
+      }
+      if (new Date(start_datetime) >= new Date(end_datetime)) {
+        return res.status(400).json({ success: false, message: 'ช่วงวันที่/เวลาไม่ถูกต้อง' })
+      }
+
+      const allowed = ['pending','approved','rejected','completed','cancelled']
+      if (!allowed.includes(rawStatus)) return res.status(400).json({ success: false, message: 'สถานะไม่ถูกต้อง' })
+
+      const conflict = await hasOverlap(car_id, start_datetime, end_datetime, id)
+      if (conflict) return res.status(409).json({ success: false, message: 'ช่วงเวลานี้ชนกับการจองที่มีอยู่แล้ว' })
+
+      const [result] = await pool.execute(
+        `UPDATE ${TABLE}
+         SET car_id = ?, user_id = ?, start_datetime = ?, end_datetime = ?, purpose = ?, destination = ?, status = ?
+         WHERE id = ?`,
+        [carIdNum, userIdNum, start_datetime, end_datetime, purpose || null, destination || null, rawStatus, id]
+      )
+      if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'ไม่พบข้อมูล' })
+      res.json({ success: true, message: 'อัปเดตสำเร็จ' })
     } catch (err) {
       console.error('Update booking error:', err)
-      res.status(500).json({ success: false, message: 'Database update error' })
+      res.status(500).json({ success: false, message: 'อัปเดตข้อมูลไม่สำเร็จ' })
     }
   })
 
@@ -103,11 +148,11 @@ export default function createBookingRouter(pool) {
     try {
       const id = req.params.id
       const [result] = await pool.execute(`UPDATE ${TABLE} SET status = 'cancelled' WHERE id = ?`, [id])
-      if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'Not found' })
-      res.json({ success: true, message: 'Cancelled' })
+      if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'ไม่พบข้อมูล' })
+      res.json({ success: true, message: 'ยกเลิกสำเร็จ' })
     } catch (err) {
       console.error('Cancel booking error:', err)
-      res.status(500).json({ success: false, message: 'Database update error' })
+      res.status(500).json({ success: false, message: 'อัปเดตข้อมูลไม่สำเร็จ' })
     }
   })
 
@@ -125,7 +170,7 @@ export default function createBookingRouter(pool) {
       res.json({ success: true, data: rows })
     } catch (err) {
       console.error('Car history error:', err)
-      res.status(500).json({ success: false, message: 'Database query error' })
+      res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการดึงข้อมูล' })
     }
   })
 

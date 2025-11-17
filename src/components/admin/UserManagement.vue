@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { API_BASE } from "@/config";
 
 interface User {
   id?: number;
@@ -20,11 +21,10 @@ const formData = ref<User>({
 });
 
 const roles = ['user', 'administrator', 'superadmin'];
-const apiBase = 'http://localhost:3000'; // server base
 
 const loadUsers = async () => {
   try {
-    const res = await fetch(`${apiBase}/api/users`);
+    const res = await fetch(`${API_BASE}/api/users`);
     const data = await res.json();
     if (data.success) users.value = data.data;
     else {
@@ -55,7 +55,7 @@ const handleSubmit = async () => {
       if (formData.value.password && formData.value.password.trim() !== '') {
         payload.password = formData.value.password
       }
-      const res = await fetch(`${apiBase}/api/users/${editingUser.value.id}`, {
+      const res = await fetch(`${API_BASE}/api/users/${editingUser.value.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -64,7 +64,7 @@ const handleSubmit = async () => {
       if (!res.ok) throw new Error(data.message || 'Update failed')
     } else {
       // Add new user - password required
-      const res = await fetch(`${apiBase}/api/adduser`, {
+      const res = await fetch(`${API_BASE}/api/adduser`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -102,7 +102,7 @@ const openDeleteModal = (user: User) => {
 const doDelete = async () => {
   if (!deleteTarget.value?.id) return
   try {
-    const res = await fetch(`${apiBase}/api/users/${deleteTarget.value.id}`, { method: 'DELETE' })
+    const res = await fetch(`${API_BASE}/api/users/${deleteTarget.value.id}`, { method: 'DELETE' })
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
       throw new Error(data.message || 'Delete failed')

@@ -13,6 +13,11 @@ export default defineConfig({
     vueDevTools(),
     tailwindcss(),
   ],
+  server: {
+    host: '0.0.0.0', // ฟังทุก IP (รวม 10.10.11.114)
+    port: 5173,
+    strictPort: false
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

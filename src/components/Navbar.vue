@@ -13,12 +13,12 @@
           <li>
             <RouterLink to="/" class="nav-item" active-class="bg-gray-900 text-white">HOME</RouterLink>
           </li>
-          <li>
+          <!-- <li>
             <RouterLink to="/about" class="nav-item" active-class="bg-gray-900 text-white">About</RouterLink>
           </li>
           <li>
             <RouterLink to="/game" class="nav-item" active-class="bg-gray-900 text-white">Game</RouterLink>
-          </li>
+          </li> -->
           <li v-if="userRole === 'administrator'">
             <RouterLink to="/Administrator" class="nav-item" active-class="bg-gray-900 text-white">Administrator</RouterLink>
           </li>

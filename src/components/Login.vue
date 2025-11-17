@@ -70,6 +70,7 @@
 import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/components/Authen.vue";
+import { API_BASE } from "@/config";
 
 const router = useRouter();
 const { login } = useAuth();
@@ -102,7 +103,7 @@ const handleLogin = async () => {
   }
 
   try {
-    const response = await fetch("http://localhost:3000/api/login", {
+    const response = await fetch(`${API_BASE}/api/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: email.value, password: password.value }),
@@ -123,11 +124,11 @@ const handleLogin = async () => {
 
       if (data.user?.role === "superadmin") {
         localStorage.setItem("allowedRoutes", JSON.stringify(["/superadmin", "/administrator", "/"]));
-        router.push("/superadmin");
+        router.push("/administrator");
       } else {
         switch (data.user?.role) {
           case "administrator":
-            router.push("/administrator");
+            router.push("/");
             break;
           default:
             router.push("/");
