@@ -1,4 +1,5 @@
 import express from 'express'
+import { sendBookingNotification, getAdminEmails, getUserInfo } from './emailService.js'
 
 export default function createBookingRouter(pool) {
   const router = express.Router()
@@ -87,6 +88,46 @@ export default function createBookingRouter(pool) {
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [car_id, user_id, start_datetime, end_datetime, purpose || null, destination || null, status]
       )
+
+      // ส่งอีเมลแจ้งเตือน (ไม่รอผลลัพธ์)
+      ;(async () => {
+        try {
+          // ดึงข้อมูล car name
+          const [carRows] = await pool.execute('SELECT name FROM car WHERE id = ?', [car_id])
+          const carName = carRows.length > 0 ? carRows[0].name : 'ไม่ระบุ'
+
+          // ดึงข้อมูล user
+          const userInfo = await getUserInfo(pool, user_id)
+          const userName = userInfo?.name || 'ไม่ระบุ'
+          const userEmail = userInfo?.email || null
+
+          // ดึงอีเมล admin
+          const adminEmails = await getAdminEmails(pool)
+
+          // ส่งอีเมล
+          await sendBookingNotification({
+            booking: {
+              id: result.insertId,
+              car_id,
+              user_id,
+              start_datetime,
+              end_datetime,
+              purpose: purpose || null,
+              destination: destination || null,
+              status
+            },
+            carName,
+            userName,
+            userEmail,
+            adminEmails,
+            action: 'created'
+          })
+        } catch (emailError) {
+          console.error('[Booking] Error sending email notification:', emailError)
+          // ไม่ส่ง error กลับไปยัง client เพราะการจองสำเร็จแล้ว
+        }
+      })()
+
       res.status(201).json({ success: true, id: result.insertId })
     } catch (err) {
       console.error('Create booking error:', err)
@@ -136,6 +177,46 @@ export default function createBookingRouter(pool) {
         [carIdNum, userIdNum, start_datetime, end_datetime, purpose || null, destination || null, rawStatus, id]
       )
       if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'ไม่พบข้อมูล' })
+
+      // ส่งอีเมลแจ้งเตือน (ไม่รอผลลัพธ์)
+      ;(async () => {
+        try {
+          // ดึงข้อมูล car name
+          const [carRows] = await pool.execute('SELECT name FROM car WHERE id = ?', [carIdNum])
+          const carName = carRows.length > 0 ? carRows[0].name : 'ไม่ระบุ'
+
+          // ดึงข้อมูล user
+          const userInfo = await getUserInfo(pool, userIdNum)
+          const userName = userInfo?.name || 'ไม่ระบุ'
+          const userEmail = userInfo?.email || null
+
+          // ดึงอีเมล admin
+          const adminEmails = await getAdminEmails(pool)
+
+          // ส่งอีเมล
+          await sendBookingNotification({
+            booking: {
+              id,
+              car_id: carIdNum,
+              user_id: userIdNum,
+              start_datetime,
+              end_datetime,
+              purpose: purpose || null,
+              destination: destination || null,
+              status: rawStatus
+            },
+            carName,
+            userName,
+            userEmail,
+            adminEmails,
+            action: 'updated'
+          })
+        } catch (emailError) {
+          console.error('[Booking] Error sending email notification:', emailError)
+          // ไม่ส่ง error กลับไปยัง client เพราะการอัปเดตสำเร็จแล้ว
+        }
+      })()
+
       res.json({ success: true, message: 'อัปเดตสำเร็จ' })
     } catch (err) {
       console.error('Update booking error:', err)
@@ -147,8 +228,56 @@ export default function createBookingRouter(pool) {
   router.put('/:id/cancel', async (req, res) => {
     try {
       const id = req.params.id
+      
+      // ดึงข้อมูลการจองก่อนยกเลิก
+      const [bookingRows] = await pool.execute(
+        `SELECT b.*, c.name AS car_name, u.name AS user_name, u.email AS user_email
+         FROM ${TABLE} b
+         LEFT JOIN car c ON c.id = b.car_id
+         LEFT JOIN user u ON u.id = b.user_id
+         WHERE b.id = ?`,
+        [id]
+      )
+
+      if (bookingRows.length === 0) {
+        return res.status(404).json({ success: false, message: 'ไม่พบข้อมูล' })
+      }
+
+      const booking = bookingRows[0]
+
       const [result] = await pool.execute(`UPDATE ${TABLE} SET status = 'cancelled' WHERE id = ?`, [id])
       if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'ไม่พบข้อมูล' })
+
+      // ส่งอีเมลแจ้งเตือน (ไม่รอผลลัพธ์)
+      ;(async () => {
+        try {
+          // ดึงอีเมล admin
+          const adminEmails = await getAdminEmails(pool)
+
+          // ส่งอีเมล
+          await sendBookingNotification({
+            booking: {
+              id: booking.id,
+              car_id: booking.car_id,
+              user_id: booking.user_id,
+              start_datetime: booking.start_datetime,
+              end_datetime: booking.end_datetime,
+              purpose: booking.purpose,
+              destination: booking.destination,
+              status: 'cancelled'
+            },
+            carName: booking.car_name || 'ไม่ระบุ',
+            userName: booking.user_name || 'ไม่ระบุ',
+            userEmail: booking.user_email || null,
+            adminEmails,
+            action: 'cancelled'
+          })
+        } catch (emailError) {
+          console.error('[Booking] Error sending email notification:', emailError)
+          // ไม่ส่ง error กลับไปยัง client เพราะการยกเลิกสำเร็จแล้ว
+        }
+      })()
+
       res.json({ success: true, message: 'ยกเลิกสำเร็จ' })
     } catch (err) {
       console.error('Cancel booking error:', err)

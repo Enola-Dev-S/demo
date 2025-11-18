@@ -32,7 +32,7 @@
             <td class="px-6 py-4">{{ car.start_date }}</td>
             <td class="px-6 py-4">{{ car.end_dete }}</td>
             <td class="px-6 py-4">
-              <div class="img-wrap" v-if="car.img" >
+              <div class="img-wrap" v-if="hasImage(car.img)">
                 <img
                   :src="getImgUrl(car.img)"
                   alt="img"                  class="img-thumb"
@@ -41,7 +41,6 @@
                   :src="getImgUrl(car.img)"
                   alt="preview"
                   class="img-preview"
-                  :style="{ width: previewWidth + 'px', height: previewHeight + 'px' }"
                 />
               </div>
               <span v-else class="text-sm text-gray-400">-</span>
@@ -69,13 +68,16 @@
     <transition name="modal" appear>
       <div v-if="showForm" class="fixed inset-0 z-40 flex items-center justify-center">
         <div class="fixed inset-0 bg-black opacity-40" @click="closeForm"></div>
-        <div class="bg-white rounded-lg shadow-lg z-50 w-full max-w-2xl mx-4 p-6 transform transition-all">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">{{ editingCar ? 'Edit Car' : 'Add New Car' }}</h3>
-            <button @click="closeForm" class="text-gray-500 hover:text-gray-800">✕</button>
+        <div class="form-modal-card">
+          <div class="form-modal-header">
+            <div>
+              <p class="form-modal-eyebrow">{{ editingCar ? 'แก้ไขข้อมูล' : 'เพิ่มรถคันใหม่' }}</p>
+              <h3 class="form-modal-title">{{ editingCar ? 'Edit Car' : 'Add New Car' }}</h3>
+            </div>
+            <button @click="closeForm" class="form-modal-close">✕</button>
           </div>
 
-          <form @submit.prevent="handleSubmit" class="space-y-4">
+          <form @submit.prevent="handleSubmit" class="form-modal-body">
             <div>
               <label class="block text-sm font-medium text-gray-700">Name</label>
               <input v-model="formData.name" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required />
@@ -100,21 +102,25 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700">Image</label>
+              <div class="flex items-center justify-between">
+                <label class="block text-sm font-medium text-gray-700">Image <span class="text-red-500">*</span></label>
+                <span class="text-xs text-gray-500">ต้องเลือกรูปก่อนกด {{ editingCar ? 'Update' : 'Create' }}</span>
+              </div>
               <div class="flex items-center space-x-3">
                 <button type="button" @click="triggerFileInput" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">Choose Image</button>
                 <span class="text-sm text-gray-600" v-if="formData.img">{{ formData.img }}</span>
                 <span class="text-sm text-gray-400" v-else>No file chosen</span>
               </div>
               <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" />
+              <p v-if="imageError" class="text-xs text-red-600 mt-2">{{ imageError }}</p>
               <div v-if="preview" class="mt-3">
                 <img :src="preview" alt="preview" class="h-32 w-auto rounded border" />
               </div>
             </div>
 
-            <div class="flex justify-end space-x-3 mt-4">
-              <button type="button" @click="closeForm" class="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Cancel</button>
-              <button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">
+            <div class="form-modal-actions">
+              <button type="button" @click="closeForm" class="btn ghost">Cancel</button>
+              <button type="submit" class="btn primary">
                 {{ editingCar ? 'Update' : 'Create' }}
               </button>
             </div>
@@ -160,6 +166,7 @@ const showForm = ref(false)
 const showDelete = ref(false)
 const preview = ref<string | null>(null)
 const selectedFile = ref<File | null>(null)
+const imageError = ref<string>('')
 const confirmDeleteId = ref<number | null>(null)
 
 const formData = ref<Car>({
@@ -174,13 +181,18 @@ const statuses = ['Available', 'Maintenance']
 const apiBase = API_BASE+'/api/car'
 const serverBase = API_BASE
 const fileInput = ref<HTMLInputElement | null>(null)
-const previewWidth = ref<number>(800)   // ปรับเป็นขนาดที่ต้องการ
-const previewHeight = ref<number>(800)  // ปรับเป็นขนาดที่ต้องการ
 
 const getImgUrl = (img?: string) => {
   if (!img) return ''
   if (img.startsWith('http')) return img
   return `${serverBase}/imgcar/${img}`
+}
+
+const hasImage = (img?: string | null) => {
+  if (!img) return false
+  const normalized = String(img).trim().toLowerCase()
+  if (!normalized) return false
+  return normalized !== 'null' && normalized !== 'undefined' && normalized !== '-'
 }
 
 // convert various date formats -> YYYY-MM-DD for <input type="date">
@@ -208,6 +220,7 @@ const onFileChange = (e: Event) => {
   if (!file) return
   selectedFile.value = file
   formData.value.img = file.name
+  imageError.value = ''
   // preview using object URL
   preview.value && URL.revokeObjectURL(preview.value)
   preview.value = URL.createObjectURL(file)
@@ -220,6 +233,8 @@ const onFileChange = (e: Event) => {
 
 const openEdit = (car: Car) => {
   editingCar.value = car
+  selectedFile.value = null
+  imageError.value = ''
   formData.value = { 
     ...car,
     start_date: toInputDate(car.start_date),
@@ -246,6 +261,15 @@ const triggerFileInput = () => {
 
 const handleSubmit = async () => {
   try {
+    const isEditing = Boolean(editingCar.value && editingCar.value.id)
+    const file = selectedFile.value
+    const hasExistingImage = hasImage(formData.value.img)
+
+    if (!isEditing && !file) {
+      imageError.value = 'กรุณาเลือกรูปก่อนบันทึก'
+      return
+    }
+
     const url = editingCar.value && editingCar.value.id ? `${apiBase}/${editingCar.value.id}` : apiBase
     const method = editingCar.value && editingCar.value.id ? 'PUT' : 'POST'
     const body = new FormData()
@@ -253,8 +277,11 @@ const handleSubmit = async () => {
     body.append('status', formData.value.status)
     body.append('start_date', formData.value.start_date)
     body.append('end_dete', formData.value.end_dete)
-    if (selectedFile.value) body.append('img', selectedFile.value)
-    else if (formData.value.img) body.append('img', formData.value.img)
+    if (file) {
+      body.append('img', file)
+    } else if (isEditing && hasExistingImage && formData.value.img) {
+      body.append('img', formData.value.img)
+    }
 
     await fetch(url, { method, body })
     await loadCars()
@@ -290,6 +317,7 @@ const resetForm = () => {
   }
   editingCar.value = null
   selectedFile.value = null
+  imageError.value = ''
   preview.value && URL.revokeObjectURL(preview.value)
   preview.value = null
 }
@@ -326,6 +354,106 @@ onMounted(() => { loadCars() })
 .modal-enter-active, .modal-leave-active { transition: all .18s ease; }
 .modal-enter-from, .modal-leave-to { opacity: 0; transform: translateY(6px) scale(.98); }
 
+.form-modal-card {
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 30px 65px rgba(15,23,42,0.25);
+  width: min(92vw, 720px);
+  padding: 30px;
+  z-index: 50;
+  position: relative;
+  overflow: hidden;
+}
+.form-modal-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(59,130,246,0.15), transparent 55%),
+              radial-gradient(circle at bottom left, rgba(99,102,241,0.08), transparent 65%);
+  pointer-events: none;
+}
+.form-modal-card > * { position: relative; z-index: 1; }
+
+.form-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.form-modal-eyebrow {
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(15,23,42,0.45);
+}
+.form-modal-title {
+  font-size: 1.65rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-top: 4px;
+}
+.form-modal-close {
+  border: none;
+  background: rgba(15,23,42,0.06);
+  color: #0f172a;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.form-modal-close:hover {
+  background: rgba(15,23,42,0.18);
+}
+
+.form-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.form-modal-body label {
+  color: rgba(15,23,42,0.75);
+}
+.form-modal-body input,
+.form-modal-body select {
+  border-radius: 12px;
+  border: 1px solid rgba(148,163,184,0.5);
+  padding: 10px 14px;
+  transition: border .15s ease, box-shadow .15s ease;
+}
+.form-modal-body input:focus,
+.form-modal-body select:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79,70,229,0.25);
+  outline: none;
+}
+
+.form-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+.btn {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 22px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.ghost {
+  background: rgba(15,23,42,0.07);
+  color: #0f172a;
+}
+.btn.primary {
+  background: linear-gradient(135deg, #6366f1, #3b82f6);
+  color: #fff;
+  box-shadow: 0 15px 30px rgba(79,70,229,0.25);
+}
+
 /* Image hover preview */
 .img-wrap { position: relative; display: inline-block; }
 .img-thumb {
@@ -341,9 +469,8 @@ onMounted(() => { loadCars() })
 .img-preview {
   position: absolute;
   left: 50%;
-  bottom: calc(100% + 8px);
+  bottom: calc(-100% + 8px);
   transform: translateX(-50%) scale(.96);
-  /* width / height ถูกกำหนดจาก inline style (previewWidth/Height) */
   object-fit: cover;
   border-radius: 8px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.35);
@@ -351,6 +478,19 @@ onMounted(() => { loadCars() })
   pointer-events: none;
   transition: opacity .18s ease, transform .18s ease;
   z-index: 50;
+  max-width: min(340px, 40vw);
+  max-height: min(240px, 40vh);
+  width: auto;
+  height: auto;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+@media (max-width: 640px) {
+  .img-preview {
+    max-width: 70vw;
+    max-height: 45vh;
+  }
 }
 
 /* On hover show full-size preview (no extra translation/offset): normal 300x400 */

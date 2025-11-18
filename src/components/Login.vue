@@ -74,8 +74,8 @@ import { API_BASE } from "@/config";
 
 const router = useRouter();
 const { login } = useAuth();
-const email = ref("test@example.com");
-const password = ref("123sad!@#^&456");
+const email = ref("sumitta@fatima.co.th");
+const password = ref("P@ssw0rd");
 const errors = reactive({ email: "", password: "", roll: "" });
 const loading = ref(false);
 

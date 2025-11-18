@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6  bg-gray-100 rounded"> 
+  <div class="p-2 w-full h-full bg-gray-100 rounded"> 
     <!-- Header -->
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center space-x-3">
@@ -38,7 +38,18 @@
           <!-- car column -->
           <div class="p-3 border-r">
             <div class="font-medium">{{ car.name }}</div>
-            <div :class="`inline-block px-2 py-0.5 rounded text-xxs ${statusClass(car.status )}`">{{ car.status || '-' }}</div>
+            <div class="flex items-center gap-2 mt-1 flex-wrap">
+              <div :class="`inline-block px-2 py-0.5 rounded text-xxs ${statusClass(car.status )}`">{{ car.status || '-' }}</div>
+              <div v-if="car.img" class="car-img-chip">
+                <span class="car-img-chip-label">IMG</span>
+                <img
+                  :src="getCarImgUrl(car.img)"
+                  alt="car preview"
+                  class="car-img-chip-preview"
+                  loading="lazy"
+                />
+              </div>
+            </div>
 
             <div class="mt-3 space-y-2">
               <button @click="openBooking(car)" class="text-sm w-full px-2 py-1 bg-green-200 hover:bg-green-500 text-green-700 rounded">จอง-Booking</button>
@@ -302,6 +313,7 @@ const cars = ref<any[]>([])
 const bookings = ref<any[]>([])
 const bookingsByCarDay = ref<Record<string, Record<string, any[]>>>({})
 const filterCar = ref<string | number>('')
+const serverBase = API_BASE
 
 // computed list used by template
 const filteredCars = computed(() => {
@@ -400,6 +412,12 @@ const loadCars = async () => {
   if (!form.value.car_id && cars.value.length) form.value.car_id = cars.value[0].id
 }
 
+const getCarImgUrl = (img?: string) => {
+  if (!img) return ''
+  if (img.startsWith('http')) return img
+  return `${serverBase}/imgcar/${img}`
+}
+
 const loadWeek = async () => {
   const weekStart = new Date(weekDays.value[0].date + 'T00:00:00')
   const weekEnd = new Date(weekDays.value[6].date + 'T23:59:59')
@@ -494,6 +512,13 @@ const openBookingEdit = (b:any) => {
 }
 
 const closeBooking = () => { showBooking.value = false; editingBooking.value = null }
+
+// watch start_date to auto-update end_date to the same day
+watch(() => form.value.start_date, (newStartDate) => {
+  if (newStartDate) {
+    form.value.end_date = newStartDate
+  }
+})
 
 // submitBooking: set status based on duration (1-2 days -> auto-approve, >2 days -> pending)
 const submitBooking = async () => {
@@ -907,4 +932,46 @@ const bookingSummaryClass = (b: any) => {
   transition: background .15s ease;
 }
 .ui-popup-button:hover { background: #1e293b; }
+
+/* car image hover chip */
+.car-img-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(15,23,42,0.08);
+  cursor: pointer;
+}
+.car-img-chip-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #0f172a;
+}
+.car-img-chip-preview {
+  position: absolute;
+  left: 150%;
+  top: calc(-100% + -50px);
+  transform: translateX(-50%) scale(.94);
+  opacity: 0;
+  pointer-events: none;
+  max-width: min(320px, 60vw);
+  max-height: min(220px, 40vh);
+  width: auto;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(15,23,42,0.1);
+  box-shadow: 0 20px 45px rgba(15,23,42,0.35);
+  background: #fff;
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 60;
+}
+.car-img-chip:hover .car-img-chip-preview,
+.car-img-chip:focus-within .car-img-chip-preview {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
 </style>

@@ -2,7 +2,7 @@ export const dbConfig = {
   host: 'localhost',
   user: 'root',
   password: 'P@ssw0rd',
-  database: 'car_rental',
+  database: 'fatima_car',
   port: 3306,
   waitForConnections: true,
   connectionLimit: 10,

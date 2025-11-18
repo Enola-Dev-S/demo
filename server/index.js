@@ -10,6 +10,7 @@ import createBookingRouter from './booking.js'
 import path from 'path'
 import config from './config.js'
 
+
 const app = express()
 
 // Middleware
