@@ -4,11 +4,11 @@ import mysql from 'mysql2/promise'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import chalk from 'chalk'
-import { dbConfig, jwtSecret } from './dbconfig.js'
 import createCarRouter from './car.js'
 import createBookingRouter from './booking.js'
-import path from 'path'
 import config from './config.js'
+import dotenv from 'dotenv'
+dotenv.config()
 
 
 const app = express()
@@ -23,7 +23,7 @@ app.use((req, res, next) => {
 });
 
 // Create database connection pool
-const pool = mysql.createPool(dbConfig)
+const pool = mysql.createPool(config.dbConfig)
 
 // Test database connection
 async function test() {
@@ -80,7 +80,7 @@ app.post('/api/login', async (req, res) => {
 
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
-      jwtSecret,
+      config.jwtSecret,
       { expiresIn: '24h' }
     )
 

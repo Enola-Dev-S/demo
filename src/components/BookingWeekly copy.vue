@@ -1,51 +1,165 @@
 <template>
   <div class="p-2 w-full bg-gray-100 rounded-xl">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center space-x-3">
-        <button
-          @click="prevWeek"
-          class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-lg"
-        >
-          ‹
-        </button>
-        <div class="text-xl font-semibold">{{ weekRangeLabel }}</div>
-        <button
-          @click="nextWeek"
-          class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-lg"
-        >
-          ›
-        </button>
+    <div
+      class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100"
+    >
+      <!-- Navigation Group -->
+      <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+        <div class="flex items-center bg-gray-100 p-1 rounded-xl">
+          <button
+            @click="prevWeek"
+            class="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <span class="px-4 font-semibold text-gray-700 min-w-[140px] text-center text-sm">{{
+            weekRangeLabel
+          }}</span>
+          <button
+            @click="nextWeek"
+            class="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
 
-        <!-- small calendar / pick date to jump -->
-        <input
-          type="date"
-          v-model="pickedDate"
-          @change="jumpToDate"
-          class="ml-4 border rounded px-2 py-1"
-        />
+        <div class="relative">
+          <input
+            type="date"
+            v-model="pickedDate"
+            @change="jumpToDate"
+            class="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition-all hover:bg-white"
+          />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+        </div>
       </div>
 
-      <div class="flex items-center space-x-3">
-        <select v-model="filterCar" @change="loadWeek" class="border rounded px-2 py-1">
-          <option value="">All cars</option>
-          <option v-for="c in cars" :key="c.id" :value="c.id">{{ c.name }}</option>
-        </select>
+      <!-- Actions Group -->
+      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+        <div class="relative group">
+          <select
+            v-model="filterCar"
+            @change="loadWeek"
+            class="appearance-none pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-gray-300 focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition-all cursor-pointer min-w-[160px]"
+          >
+            <option value="">All Cars</option>
+            <option v-for="c in cars" :key="c.id" :value="c.id">{{ c.name }}</option>
+          </select>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none group-hover:text-gray-600 transition-colors"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+            />
+          </svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>
+
+        <div class="h-8 w-px bg-gray-200 hidden md:block mx-1"></div>
+
+        <button
+          @click="loadWeek"
+          class="p-2.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all duration-200"
+          title="Refresh"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+        </button>
+
         <button
           @click="openBooking(null)"
-          class="hover:bg-blue-300 bg-blue-600 text-white px-3 py-1 rounded"
+          class="flex items-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-gray-200 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
         >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
           New Booking
-        </button>
-        <button @click="loadWeek" class="px-3 py-1 bg-white hover:bg-gray-300 rounded">
-          Refresh
         </button>
       </div>
     </div>
 
     <!-- Weekly grid -->
-    <div class="bg-white rounded shadow overflow-auto">
-      <div class="grid grid-cols-[260px_1fr] border-b bg-gray-50">
+    <div class="bg-white rounded shadow overflow-auto max-h-[calc(100vh-200px)]">
+      <div class="grid grid-cols-[260px_1fr] border-b bg-gray-50 sticky top-0 z-10">
         <div class="p-2 text-sm font-medium border-r">Car / Day</div>
         <div class="flex">
           <div v-for="d in weekDays" :key="d.date" class="flex-1 text-center p-2 text-sm border-l">
@@ -56,11 +170,7 @@
       </div>
 
       <div>
-        <div
-          v-for="car in filteredCars"
-          :key="car.id"
-          class="grid grid-cols-[260px_1fr] items-start border-t"
-        >
+        <div v-for="car in filteredCars" :key="car.id" class="grid grid-cols-[260px_1fr] border-t">
           <!-- car column -->
           <div class="p-3 border-r">
             <div class="font-medium">{{ car.name }}</div>
@@ -82,7 +192,7 @@
             <div class="mt-3 space-y-2">
               <button
                 @click="openBooking(car)"
-                class="text-sm w-full px-2 py-1 bg-green-200 hover:bg-green-500 text-green-700 rounded"
+                class="text-sm w-full px-2 py-1 bg-green-200 hover:bg-green-00 text-green-700 rounded"
               >
                 จอง-Booking
               </button>
@@ -110,7 +220,10 @@
                 >
                   <div class="flex items-start justify-between">
                     <div class="pr-2">
-                      <div class="font-semibold truncate">{{ b.user_name || b.user_id }}</div>
+                      <div class="font-semibold truncate">
+                        {{ (b.user_name || b.user_id || "").slice(0, 10)
+                        }}{{ (b.user_name || b.user_id || "").length > 10 ? "..." : "" }}
+                      </div>
                       <div class="truncate">
                         {{ formatTime(b.start_datetime) }} - {{ formatTime(b.end_datetime) }}
                         <span class="ml-2 text-xxs text-white/90">({{ bookingDays(b) }}d)</span>
@@ -157,7 +270,7 @@
                 </div>
               </div>
 
-              <div v-else class="text-xs text-gray-400 text-center py-4">-</div>
+              <div v-else class="text-xs text-gray-200 text-center py-4">Not Booking</div>
             </div>
           </div>
         </div>
@@ -193,6 +306,16 @@
               <label>SelectCar-เลือกรถ</label>
               <select v-model="form.car_id" required>
                 <option v-for="c in cars" :key="c.id" :value="c.id">{{ c.name }}</option>
+              </select>
+            </div>
+
+            <div v-if="isAdmin" class="form-group">
+              <label>จองให้ผู้ใช้ (Book for User)</label>
+              <select v-model="form.user_id" required>
+                <option value="" disabled>เลือกผู้ใช้</option>
+                <option v-for="u in users" :key="u.id" :value="u.id">
+                  {{ u.name }} ({{ u.email }})
+                </option>
               </select>
             </div>
 
@@ -420,6 +543,7 @@ const jumpToDate = () => {
 
 // data
 const cars = ref<any[]>([]);
+const users = ref<any[]>([]);
 const bookings = ref<any[]>([]);
 const bookingsByCarDay = ref<Record<string, Record<string, any[]>>>({});
 const filterCar = ref<string | number>("");
@@ -535,6 +659,12 @@ const loadCars = async () => {
   if (!form.value.car_id && cars.value.length) form.value.car_id = cars.value[0].id;
 };
 
+const loadUsers = async () => {
+  const res = await fetch(`${API_BASE}/api/users`);
+  const data = await res.json();
+  users.value = data.data || [];
+};
+
 const getCarImgUrl = (img?: string) => {
   if (!img) return "";
   if (img.startsWith("http")) return img;
@@ -606,6 +736,9 @@ const loadWeek = async () => {
 
 const loadAll = async () => {
   await loadCars();
+  if (isAdmin.value) {
+    await loadUsers();
+  }
   await loadWeek();
 };
 

@@ -19,7 +19,8 @@
                   stroke-width="2"
                   d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
                 />
-              </svg> <!-- icon svg -->
+              </svg>
+              <!-- icon svg -->
             </span>
             <input
               v-model="email"
@@ -42,8 +43,8 @@
                   stroke-linejoin="round"
                   stroke-width="2"
                   d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg><!-- icon svg -->
+                /></svg
+              ><!-- icon svg -->
             </span>
             <input
               v-model="password"
@@ -74,7 +75,7 @@ import { API_BASE } from "@/config";
 
 const router = useRouter();
 const { login } = useAuth();
-const email = ref("sumitta@fatima.co.th");
+const email = ref("canon@fatima.co.th");
 const password = ref("P@ssw0rd");
 const errors = reactive({ email: "", password: "", roll: "" });
 const loading = ref(false);
@@ -116,14 +117,18 @@ const handleLogin = async () => {
       localStorage.setItem("userEmail", data.user?.email || email.value);
       localStorage.setItem("userRole", data.user?.role || "");
       if (data.user?.id !== undefined) localStorage.setItem("userId", String(data.user.id));
-      const username = data.user?.name || data.user?.email?.split?.('@')?.[0] || email.value.split('@')[0];
+      const username =
+        data.user?.name || data.user?.email?.split?.("@")?.[0] || email.value.split("@")[0];
       localStorage.setItem("username", username);
       if (data.token) localStorage.setItem("token", data.token);
 
       login();
 
       if (data.user?.role === "superadmin") {
-        localStorage.setItem("allowedRoutes", JSON.stringify(["/superadmin", "/administrator", "/"]));
+        localStorage.setItem(
+          "allowedRoutes",
+          JSON.stringify(["/superadmin", "/administrator", "/"])
+        );
         router.push("/administrator");
       } else {
         switch (data.user?.role) {

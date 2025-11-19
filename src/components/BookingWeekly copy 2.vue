@@ -1,69 +1,179 @@
 <template>
-  <div class="p-2 w-full bg-gray-100 rounded-xl">
+  <div class="p-1 w-full h-screen max-h-[800px] bg-gray-100 flex flex-col">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center space-x-3">
-        <button
-          @click="prevWeek"
-          class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-lg"
-        >
-          ‹
-        </button>
-        <div class="text-xl font-semibold">{{ weekRangeLabel }}</div>
-        <button
-          @click="nextWeek"
-          class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-lg"
-        >
-          ›
-        </button>
+    <div
+      class="flex justify-between items-center gap-2 mb-2 bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-100"
+    >
+      <!-- Navigation Group -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center bg-gray-100 p-0.5 rounded-lg">
+          <button
+            @click="prevWeek"
+            class="p-1 hover:bg-white hover:shadow-sm rounded transition-all duration-200 text-gray-600 hover:text-gray-900"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+          <span class="px-2 font-semibold text-gray-700 min-w-[120px] text-center text-xs">{{
+            weekRangeLabel
+          }}</span>
+          <button
+            @click="nextWeek"
+            class="p-1 hover:bg-white hover:shadow-sm rounded transition-all duration-200 text-gray-600 hover:text-gray-900"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
 
-        <!-- small calendar / pick date to jump -->
-        <input
-          type="date"
-          v-model="pickedDate"
-          @change="jumpToDate"
-          class="ml-4 border rounded px-2 py-1"
-        />
+        <div class="relative">
+          <input
+            type="date"
+            v-model="pickedDate"
+            @change="jumpToDate"
+            class="pl-7 pr-3 py-1 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:ring-1 focus:ring-gray-900 focus:border-transparent outline-none transition-all hover:bg-white"
+          />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+        </div>
       </div>
 
-      <div class="flex items-center space-x-3">
-        <select v-model="filterCar" @change="loadWeek" class="border rounded px-2 py-1">
-          <option value="">All cars</option>
-          <option v-for="c in cars" :key="c.id" :value="c.id">{{ c.name }}</option>
-        </select>
+      <!-- Actions Group -->
+      <div class="flex items-center gap-2">
+        <div class="relative group">
+          <select
+            v-model="filterCar"
+            @change="loadWeek"
+            class="appearance-none pl-7 pr-6 py-1 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:border-gray-300 focus:ring-1 focus:ring-gray-900 focus:border-transparent outline-none transition-all cursor-pointer min-w-[120px]"
+          >
+            <option value="">All Cars</option>
+            <option v-for="c in cars" :key="c.id" :value="c.id">{{ c.name }}</option>
+          </select>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none group-hover:text-gray-600 transition-colors"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+            />
+          </svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>
+
+        <div class="h-8 w-px bg-gray-200 hidden md:block mx-1"></div>
+
+        <button
+          @click="loadWeek"
+          class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200"
+          title="Refresh"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+        </button>
+
         <button
           @click="openBooking(null)"
-          class="hover:bg-blue-300 bg-blue-600 text-white px-3 py-1 rounded"
+          class="flex items-center gap-1 px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-medium rounded-lg shadow-md shadow-gray-200 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
         >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
           New Booking
-        </button>
-        <button @click="loadWeek" class="px-3 py-1 bg-white hover:bg-gray-300 rounded">
-          Refresh
         </button>
       </div>
     </div>
 
     <!-- Weekly grid -->
-    <div class="bg-white rounded shadow overflow-auto">
-      <div class="grid grid-cols-[260px_1fr] border-b bg-gray-50">
-        <div class="p-2 text-sm font-medium border-r">Car / Day</div>
+    <div class="flex-1 bg-white rounded shadow overflow-auto" style="max-height: 680px">
+      <div class="grid grid-cols-[150px_1fr] border-b bg-gray-50 sticky top-0 z-10">
+        <div class="p-1.5 text-xs font-medium border-r">Car / Day</div>
         <div class="flex">
-          <div v-for="d in weekDays" :key="d.date" class="flex-1 text-center p-2 text-sm border-l">
+          <div v-for="d in weekDays" :key="d.date" class="flex-1 text-center p-1 text-xs border-l">
             <div class="font-semibold">{{ d.labelShort }}</div>
-            <div class="text-xs text-gray-500">{{ d.labelDate }}</div>
+            <div class="text-xxs text-gray-500">{{ d.labelDate }}</div>
           </div>
         </div>
       </div>
 
       <div>
-        <div
-          v-for="car in filteredCars"
-          :key="car.id"
-          class="grid grid-cols-[260px_1fr] items-start border-t"
-        >
+        <div v-for="car in filteredCars" :key="car.id" class="grid grid-cols-[150px_1fr] border-t">
           <!-- car column -->
-          <div class="p-3 border-r">
-            <div class="font-medium">{{ car.name }}</div>
+          <div class="p-2 border-r">
+            <div class="font-medium text-xs">{{ car.name }}</div>
             <div class="flex items-center gap-2 mt-1 flex-wrap">
               <div :class="`inline-block px-2 py-0.5 rounded text-xxs ${statusClass(car.status)}`">
                 {{ car.status || "-" }}
@@ -79,16 +189,16 @@
               </div>
             </div>
 
-            <div class="mt-3 space-y-2">
+            <div class="mt-2 space-y-1">
               <button
                 @click="openBooking(car)"
-                class="text-sm w-full px-2 py-1 bg-green-200 hover:bg-green-500 text-green-700 rounded"
+                class="text-xs w-full px-1.5 py-0.5 bg-green-200 hover:bg-green-300 text-green-700 rounded"
               >
                 จอง-Booking
               </button>
               <button
                 @click="viewHistory(car)"
-                class="text-sm w-full px-2 py-1 bg-gray-200 hover:bg-gray-100 rounded"
+                class="text-xs w-full px-1.5 py-0.5 bg-gray-200 hover:bg-gray-100 rounded"
               >
                 ประวัติ-History
               </button>
@@ -97,33 +207,42 @@
 
           <!-- days columns -->
           <div class="flex">
-            <div v-for="d in weekDays" :key="d.date" class="flex-1 p-2 min-h-24 border-l relative">
+            <div
+              v-for="d in weekDays"
+              :key="d.date"
+              class="flex-1 p-1.5 min-h-20 border-l relative"
+            >
               <!-- times summary (small) -->
               <div
                 v-if="bookingsByCarDay[String(car.id)] && bookingsByCarDay[String(car.id)][d.date]"
-                class="space-y-2"
+                class="space-y-0.5"
               >
                 <div
                   v-for="b in bookingsByCarDay[String(car.id)][d.date]"
                   :key="b.id"
                   :class="bookingSummaryClass(b)"
                 >
-                  <div class="flex items-start justify-between">
-                    <div class="pr-2">
-                      <div class="font-semibold truncate">{{ b.user_name || b.user_id }}</div>
-                      <div class="truncate">
-                        {{ formatTime(b.start_datetime) }} - {{ formatTime(b.end_datetime) }}
-                        <span class="ml-2 text-xxs text-white/90">({{ bookingDays(b) }}d)</span>
+                  <div class="flex items-start justify-between text-[0.5rem]">
+                    <div class="pr-0.5">
+                      <div class="font-semibold truncate leading-none">
+                        {{ (b.user_name || b.user_id || "").slice(0, 10)
+                        }}{{ (b.user_name || b.user_id || "").length > 10 ? "..." : "" }}
                       </div>
-                      <div class="text-xxs text-white/90 truncate">
+                      <div class="truncate leading-none text-[0.45rem]">
+                        {{ formatTime(b.start_datetime) }} - {{ formatTime(b.end_datetime) }}
+                        <span class="ml-0.5 text-[0.4rem] text-white/90"
+                          >({{ bookingDays(b) }}d)</span
+                        >
+                      </div>
+                      <div class="text-[0.45rem] text-white/90 truncate leading-none">
                         {{ b.destination || b.purpose }}
                       </div>
                     </div>
 
                     <!-- status badge -->
-                    <div class="ml-2">
+                    <div class="ml-0.5">
                       <span
-                        :class="`inline-block px-2 py-0.5 rounded text-xxs ${statusClass(
+                        :class="`inline-block px-0.5 py-0 rounded text-[0.4rem] ${statusClass(
                           b.status
                         )}`"
                       >
@@ -132,14 +251,14 @@
                     </div>
                   </div>
 
-                  <div class="absolute right-2 top-8 flex space-x-1">
+                  <div class="absolute right-0.5 top-6.5 flex space-x-0.5">
                     <button
                       v-if="
                         (isOwner(b) || isAdmin) &&
                         String(b?.status || '').toLowerCase() !== 'cancelled'
                       "
                       @click.stop="showCancelConfirm(b)"
-                      class="text-xxs px-2 py-0.5 bg-white/20 rounded hover:bg-white/50 hover:text-white-900"
+                      class="text-[0.4rem] px-0.5 py-0 bg-white/20 rounded hover:bg-white/50 hover:text-white-900"
                     >
                       Cancel
                     </button>
@@ -149,7 +268,7 @@
                         String(b?.status || '').toLowerCase() !== 'cancelled'
                       "
                       @click.stop="openBookingEdit(b)"
-                      class="text-xxs px-2 py-0.5 bg-white/20 rounded hover:bg-white/50 hover:text-white-900"
+                      class="text-[0.4rem] px-0.5 py-0 bg-white/20 rounded hover:bg-white/50 hover:text-white-900"
                     >
                       Edit
                     </button>
@@ -157,7 +276,7 @@
                 </div>
               </div>
 
-              <div v-else class="text-xs text-gray-400 text-center py-4">-</div>
+              <div v-else class="text-xs text-gray-200 text-center py-4">Not Booking</div>
             </div>
           </div>
         </div>
@@ -193,6 +312,16 @@
               <label>SelectCar-เลือกรถ</label>
               <select v-model="form.car_id" required>
                 <option v-for="c in cars" :key="c.id" :value="c.id">{{ c.name }}</option>
+              </select>
+            </div>
+
+            <div v-if="isAdmin" class="form-group">
+              <label>จองให้ผู้ใช้ (Book for User)</label>
+              <select v-model="form.user_id" required>
+                <option value="" disabled>เลือกผู้ใช้</option>
+                <option v-for="u in users" :key="u.id" :value="u.id">
+                  {{ u.name }} ({{ u.email }})
+                </option>
               </select>
             </div>
 
@@ -420,6 +549,7 @@ const jumpToDate = () => {
 
 // data
 const cars = ref<any[]>([]);
+const users = ref<any[]>([]);
 const bookings = ref<any[]>([]);
 const bookingsByCarDay = ref<Record<string, Record<string, any[]>>>({});
 const filterCar = ref<string | number>("");
@@ -535,6 +665,12 @@ const loadCars = async () => {
   if (!form.value.car_id && cars.value.length) form.value.car_id = cars.value[0].id;
 };
 
+const loadUsers = async () => {
+  const res = await fetch(`${API_BASE}/api/users`);
+  const data = await res.json();
+  users.value = data.data || [];
+};
+
 const getCarImgUrl = (img?: string) => {
   if (!img) return "";
   if (img.startsWith("http")) return img;
@@ -606,6 +742,9 @@ const loadWeek = async () => {
 
 const loadAll = async () => {
   await loadCars();
+  if (isAdmin.value) {
+    await loadUsers();
+  }
   await loadWeek();
 };
 
@@ -856,12 +995,12 @@ const bookingSummaryClass = (b: any) => {
 
 /* booking modal new styling */
 .booking-modal-card {
-  width: min(90vw, 520px);
-  border-radius: 22px;
-  padding: 30px;
+  width: min(90vw, 260px);
+  border-radius: 11px;
+  padding: 15px;
   background: linear-gradient(135deg, #f0f2f5, #d9dde3 55%, #c8ccd3);
   color: #111827;
-  box-shadow: 0 25px 55px rgba(17, 24, 39, 0.18);
+  box-shadow: 0 12px 27px rgba(17, 24, 39, 0.18);
   position: relative;
   overflow: hidden;
 }
@@ -880,66 +1019,67 @@ const bookingSummaryClass = (b: any) => {
 
 .booking-modal-header {
   display: flex;
-  gap: 16px;
+  gap: 8px;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 .booking-modal-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
   background: rgba(255, 255, 255, 0.65);
   display: grid;
   place-items: center;
-  font-size: 24px;
+  font-size: 12px;
   color: #111827;
 }
 .booking-modal-eyebrow {
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
+  font-size: 0.41rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: rgba(17, 24, 39, 0.6);
 }
 .booking-modal-title {
-  font-size: 1.6rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  margin-top: 2px;
+  margin-top: 1px;
   color: #0f172a;
 }
 .booking-modal-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 9px;
 }
 .booking-modal-errors {
   background: rgba(248, 113, 113, 0.15);
   border: 1px solid rgba(248, 113, 113, 0.45);
   color: #b91c1c;
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 0.9rem;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.45rem;
 }
 .booking-modal-errors ul {
-  margin-left: 20px;
+  margin-left: 10px;
   list-style: disc;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
 }
 .form-group label {
-  font-size: 0.9rem;
+  font-size: 0.45rem;
   color: rgba(17, 24, 39, 0.75);
 }
 .form-group input,
 .form-group select {
   border: 1px solid rgba(148, 163, 184, 0.5);
-  border-radius: 12px;
-  padding: 11px 13px;
+  border-radius: 6px;
+  padding: 5px 6px;
   background: rgba(255, 255, 255, 0.9);
   color: #0f172a;
+  font-size: 0.5rem;
   transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 .form-group input:hover,
@@ -955,70 +1095,71 @@ const bookingSummaryClass = (b: any) => {
 }
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 7px;
 }
 .schedule-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
 }
 .schedule-card {
-  border-radius: 16px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.55);
   border: 1px solid rgba(148, 163, 184, 0.35);
-  padding: 22px;
+  padding: 11px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .schedule-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
+  gap: 6px;
 }
 .schedule-card-title {
   font-weight: 600;
   color: #0f172a;
+  font-size: 0.5rem;
 }
 .schedule-card-caption {
-  font-size: 0.85rem;
+  font-size: 0.42rem;
   color: rgba(17, 24, 39, 0.65);
-  margin-top: 2px;
+  margin-top: 1px;
 }
 .schedule-chip {
-  padding: 4px 10px;
+  padding: 2px 5px;
   border-radius: 999px;
   background: rgba(59, 130, 246, 0.15);
   color: #2563eb;
-  font-size: 0.75rem;
+  font-size: 0.37rem;
   font-weight: 600;
 }
 .schedule-card-body {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 9px;
 }
 .schedule-input {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 .schedule-input label {
-  font-size: 0.8rem;
+  font-size: 0.4rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: rgba(15, 23, 42, 0.65);
 }
 .schedule-input input {
-  border-radius: 10px;
+  border-radius: 5px;
   border: 1px solid rgba(148, 163, 184, 0.5);
-  padding: 12px 14px;
+  padding: 6px 7px;
   background: #fff;
   color: #0f172a;
-  font-size: 0.95rem;
+  font-size: 0.47rem;
   transition: border 0.15s ease, box-shadow 0.15s ease;
 }
 .schedule-input input:focus {
@@ -1029,7 +1170,7 @@ const bookingSummaryClass = (b: any) => {
 
 @media (max-width: 520px) {
   .schedule-card {
-    padding: 18px;
+    padding: 9px;
   }
   .schedule-card-body {
     grid-template-columns: 1fr;
@@ -1039,14 +1180,15 @@ const bookingSummaryClass = (b: any) => {
 .booking-modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 6px;
+  gap: 5px;
+  margin-top: 3px;
 }
 .btn {
   border: none;
-  border-radius: 10px;
-  padding: 10px 22px;
+  border-radius: 5px;
+  padding: 5px 11px;
   font-weight: 600;
+  font-size: 0.5rem;
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
 }

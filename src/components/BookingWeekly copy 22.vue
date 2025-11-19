@@ -1,69 +1,22 @@
 <template>
-  <div class="p-2 w-full bg-gray-100 rounded-xl">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center space-x-3">
-        <button
-          @click="prevWeek"
-          class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-lg"
-        >
-          ‹
-        </button>
-        <div class="text-xl font-semibold">{{ weekRangeLabel }}</div>
-        <button
-          @click="nextWeek"
-          class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-lg"
-        >
-          ›
-        </button>
-
-        <!-- small calendar / pick date to jump -->
-        <input
-          type="date"
-          v-model="pickedDate"
-          @change="jumpToDate"
-          class="ml-4 border rounded px-2 py-1"
-        />
-      </div>
-
-      <div class="flex items-center space-x-3">
-        <select v-model="filterCar" @change="loadWeek" class="border rounded px-2 py-1">
-          <option value="">All cars</option>
-          <option v-for="c in cars" :key="c.id" :value="c.id">{{ c.name }}</option>
-        </select>
-        <button
-          @click="openBooking(null)"
-          class="hover:bg-blue-300 bg-blue-600 text-white px-3 py-1 rounded"
-        >
-          New Booking
-        </button>
-        <button @click="loadWeek" class="px-3 py-1 bg-white hover:bg-gray-300 rounded">
-          Refresh
-        </button>
-      </div>
-    </div>
-
-    <!-- Weekly grid -->
-    <div class="bg-white rounded shadow overflow-auto">
-      <div class="grid grid-cols-[260px_1fr] border-b bg-gray-50">
-        <div class="p-2 text-sm font-medium border-r">Car / Day</div>
+  <div class="p-1 w-full h-screen max-h-[800px] bg-gray-100 flex flex-col">
+        <!-- Weekly grid -->
+    <div class="flex-1 bg-white rounded shadow overflow-auto" style="max-height: 680px">
+      <div class="grid grid-cols-[150px_1fr] border-b bg-gray-50 sticky top-0 z-10">
+        <div class="p-1.5 text-xs font-medium border-r">Car / Day</div>
         <div class="flex">
-          <div v-for="d in weekDays" :key="d.date" class="flex-1 text-center p-2 text-sm border-l">
+          <div v-for="d in weekDays" :key="d.date" class="flex-1 text-center p-1 text-xs border-l">
             <div class="font-semibold">{{ d.labelShort }}</div>
-            <div class="text-xs text-gray-500">{{ d.labelDate }}</div>
+            <div class="text-xxs text-gray-500">{{ d.labelDate }}</div>
           </div>
         </div>
       </div>
 
       <div>
-        <div
-          v-for="car in filteredCars"
-          :key="car.id"
-          class="grid grid-cols-[260px_1fr] items-start border-t"
-        >
+        <div v-for="car in filteredCars" :key="car.id" class="grid grid-cols-[150px_1fr] border-t">
           <!-- car column -->
-          <div class="p-3 border-r">
-            <div class="font-medium">{{ car.name }}</div>
+          <div class="p-2 border-r">
+            <div class="font-medium text-xs">{{ car.name }}</div>
             <div class="flex items-center gap-2 mt-1 flex-wrap">
               <div :class="`inline-block px-2 py-0.5 rounded text-xxs ${statusClass(car.status)}`">
                 {{ car.status || "-" }}
@@ -79,16 +32,16 @@
               </div>
             </div>
 
-            <div class="mt-3 space-y-2">
+            <div class="mt-2 space-y-1">
               <button
                 @click="openBooking(car)"
-                class="text-sm w-full px-2 py-1 bg-green-200 hover:bg-green-500 text-green-700 rounded"
+                class="text-xs w-full px-1.5 py-0.5 bg-green-200 hover:bg-green-300 text-green-700 rounded"
               >
                 จอง-Booking
               </button>
               <button
                 @click="viewHistory(car)"
-                class="text-sm w-full px-2 py-1 bg-gray-200 hover:bg-gray-100 rounded"
+                class="text-xs w-full px-1.5 py-0.5 bg-gray-200 hover:bg-gray-100 rounded"
               >
                 ประวัติ-History
               </button>
@@ -97,33 +50,42 @@
 
           <!-- days columns -->
           <div class="flex">
-            <div v-for="d in weekDays" :key="d.date" class="flex-1 p-2 min-h-24 border-l relative">
+            <div
+              v-for="d in weekDays"
+              :key="d.date"
+              class="flex-1 p-1.5 min-h-20 border-l relative"
+            >
               <!-- times summary (small) -->
               <div
                 v-if="bookingsByCarDay[String(car.id)] && bookingsByCarDay[String(car.id)][d.date]"
-                class="space-y-2"
+                class="space-y-0.5"
               >
                 <div
                   v-for="b in bookingsByCarDay[String(car.id)][d.date]"
                   :key="b.id"
                   :class="bookingSummaryClass(b)"
                 >
-                  <div class="flex items-start justify-between">
-                    <div class="pr-2">
-                      <div class="font-semibold truncate">{{ b.user_name || b.user_id }}</div>
-                      <div class="truncate">
-                        {{ formatTime(b.start_datetime) }} - {{ formatTime(b.end_datetime) }}
-                        <span class="ml-2 text-xxs text-white/90">({{ bookingDays(b) }}d)</span>
+                  <div class="flex items-start justify-between text-[0.5rem]">
+                    <div class="pr-0.5">
+                      <div class="font-semibold truncate leading-none">
+                        {{ (b.user_name || b.user_id || "").slice(0, 10)
+                        }}{{ (b.user_name || b.user_id || "").length > 10 ? "..." : "" }}
                       </div>
-                      <div class="text-xxs text-white/90 truncate">
+                      <div class="truncate leading-none text-[0.45rem]">
+                        {{ formatTime(b.start_datetime) }} - {{ formatTime(b.end_datetime) }}
+                        <span class="ml-0.5 text-[0.4rem] text-white/90"
+                          >({{ bookingDays(b) }}d)</span
+                        >
+                      </div>
+                      <div class="text-[0.45rem] text-white/90 truncate leading-none">
                         {{ b.destination || b.purpose }}
                       </div>
                     </div>
 
                     <!-- status badge -->
-                    <div class="ml-2">
+                    <div class="ml-0.5">
                       <span
-                        :class="`inline-block px-2 py-0.5 rounded text-xxs ${statusClass(
+                        :class="`inline-block px-0.5 py-0 rounded text-[0.4rem] ${statusClass(
                           b.status
                         )}`"
                       >
@@ -132,14 +94,14 @@
                     </div>
                   </div>
 
-                  <div class="absolute right-2 top-8 flex space-x-1">
+                  <div class="absolute right-0.5 top-6.5 flex space-x-0.5">
                     <button
                       v-if="
                         (isOwner(b) || isAdmin) &&
                         String(b?.status || '').toLowerCase() !== 'cancelled'
                       "
                       @click.stop="showCancelConfirm(b)"
-                      class="text-xxs px-2 py-0.5 bg-white/20 rounded hover:bg-white/50 hover:text-white-900"
+                      class="text-[0.4rem] px-0.5 py-0 bg-white/20 rounded hover:bg-white/50 hover:text-white-900"
                     >
                       Cancel
                     </button>
@@ -149,7 +111,7 @@
                         String(b?.status || '').toLowerCase() !== 'cancelled'
                       "
                       @click.stop="openBookingEdit(b)"
-                      class="text-xxs px-2 py-0.5 bg-white/20 rounded hover:bg-white/50 hover:text-white-900"
+                      class="text-[0.4rem] px-0.5 py-0 bg-white/20 rounded hover:bg-white/50 hover:text-white-900"
                     >
                       Edit
                     </button>
@@ -157,7 +119,7 @@
                 </div>
               </div>
 
-              <div v-else class="text-xs text-gray-400 text-center py-4">-</div>
+              <div v-else class="text-xs text-gray-200 text-center py-4">Not Booking</div>
             </div>
           </div>
         </div>
@@ -193,6 +155,16 @@
               <label>SelectCar-เลือกรถ</label>
               <select v-model="form.car_id" required>
                 <option v-for="c in cars" :key="c.id" :value="c.id">{{ c.name }}</option>
+              </select>
+            </div>
+
+            <div v-if="isAdmin" class="form-group">
+              <label>จองให้ผู้ใช้ (Book for User)</label>
+              <select v-model="form.user_id" required>
+                <option value="" disabled>เลือกผู้ใช้</option>
+                <option v-for="u in users" :key="u.id" :value="u.id">
+                  {{ u.name }} ({{ u.email }})
+                </option>
               </select>
             </div>
 
@@ -390,8 +362,17 @@ const makeWeekDays = (baseDateStr: string) => {
   return days;
 };
 
-const weekStartDate = ref(formatDateLocal(startOfWeek(new Date())));
+const props = defineProps<{ startDate?: string; filterCar?: string | number }>();
+
+const weekStartDate = ref(props.startDate || formatDateLocal(startOfWeek(new Date())));
 const weekDays = ref(makeWeekDays(weekStartDate.value));
+
+watch(() => props.startDate, (newVal) => {
+  if (newVal && newVal !== weekStartDate.value) {
+    weekStartDate.value = newVal;
+  }
+});
+
 watch(weekStartDate, () => (weekDays.value = makeWeekDays(weekStartDate.value)));
 const weekRangeLabel = computed(() => {
   const a = weekDays.value[0].full,
@@ -420,16 +401,17 @@ const jumpToDate = () => {
 
 // data
 const cars = ref<any[]>([]);
+const users = ref<any[]>([]);
 const bookings = ref<any[]>([]);
 const bookingsByCarDay = ref<Record<string, Record<string, any[]>>>({});
-const filterCar = ref<string | number>("");
+// const filterCar = ref<string | number>(""); // Removed in favor of props.filterCar
 const serverBase = API_BASE;
 
 // computed list used by template
 const filteredCars = computed(() => {
   if (!cars.value) return [];
-  if (!filterCar.value && filterCar.value !== 0) return cars.value;
-  return cars.value.filter((c) => String(c.id) === String(filterCar.value));
+  if (!props.filterCar && props.filterCar !== 0) return cars.value;
+  return cars.value.filter((c) => String(c.id) === String(props.filterCar));
 });
 
 // user info
@@ -535,6 +517,12 @@ const loadCars = async () => {
   if (!form.value.car_id && cars.value.length) form.value.car_id = cars.value[0].id;
 };
 
+const loadUsers = async () => {
+  const res = await fetch(`${API_BASE}/api/users`);
+  const data = await res.json();
+  users.value = data.data || [];
+};
+
 const getCarImgUrl = (img?: string) => {
   if (!img) return "";
   if (img.startsWith("http")) return img;
@@ -547,14 +535,14 @@ const loadWeek = async () => {
   const params = new URLSearchParams();
   params.set("start", weekStart.toISOString());
   params.set("end", weekEnd.toISOString());
-  if (filterCar.value) params.set("car_id", String(filterCar.value));
+  if (props.filterCar) params.set("car_id", String(props.filterCar));
 
   console.log(
     "[BookingWeekly] loadWeek ->",
     weekStart.toISOString(),
     weekEnd.toISOString(),
     "filterCar=",
-    filterCar.value
+    props.filterCar
   );
 
   const res = await fetch(`${API_BASE}/api/booking?${params.toString()}`);
@@ -606,6 +594,9 @@ const loadWeek = async () => {
 
 const loadAll = async () => {
   await loadCars();
+  if (isAdmin.value) {
+    await loadUsers();
+  }
   await loadWeek();
 };
 
@@ -820,6 +811,9 @@ const bookingDays = (b: any) => {
   }
 };
 
+watch(() => props.filterCar, loadWeek);
+defineExpose({ openBooking, loadWeek });
+
 const bookingSummaryClass = (b: any) => {
   const days = bookingDays(b);
   // special cancelled styling
@@ -856,12 +850,12 @@ const bookingSummaryClass = (b: any) => {
 
 /* booking modal new styling */
 .booking-modal-card {
-  width: min(90vw, 520px);
-  border-radius: 22px;
-  padding: 30px;
+  width: min(90vw, 260px);
+  border-radius: 11px;
+  padding: 15px;
   background: linear-gradient(135deg, #f0f2f5, #d9dde3 55%, #c8ccd3);
   color: #111827;
-  box-shadow: 0 25px 55px rgba(17, 24, 39, 0.18);
+  box-shadow: 0 12px 27px rgba(17, 24, 39, 0.18);
   position: relative;
   overflow: hidden;
 }
@@ -880,66 +874,67 @@ const bookingSummaryClass = (b: any) => {
 
 .booking-modal-header {
   display: flex;
-  gap: 16px;
+  gap: 8px;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 .booking-modal-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
   background: rgba(255, 255, 255, 0.65);
   display: grid;
   place-items: center;
-  font-size: 24px;
+  font-size: 12px;
   color: #111827;
 }
 .booking-modal-eyebrow {
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
+  font-size: 0.41rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: rgba(17, 24, 39, 0.6);
 }
 .booking-modal-title {
-  font-size: 1.6rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  margin-top: 2px;
+  margin-top: 1px;
   color: #0f172a;
 }
 .booking-modal-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 9px;
 }
 .booking-modal-errors {
   background: rgba(248, 113, 113, 0.15);
   border: 1px solid rgba(248, 113, 113, 0.45);
   color: #b91c1c;
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 0.9rem;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.45rem;
 }
 .booking-modal-errors ul {
-  margin-left: 20px;
+  margin-left: 10px;
   list-style: disc;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
 }
 .form-group label {
-  font-size: 0.9rem;
+  font-size: 0.45rem;
   color: rgba(17, 24, 39, 0.75);
 }
 .form-group input,
 .form-group select {
   border: 1px solid rgba(148, 163, 184, 0.5);
-  border-radius: 12px;
-  padding: 11px 13px;
+  border-radius: 6px;
+  padding: 5px 6px;
   background: rgba(255, 255, 255, 0.9);
   color: #0f172a;
+  font-size: 0.5rem;
   transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 .form-group input:hover,
@@ -955,70 +950,71 @@ const bookingSummaryClass = (b: any) => {
 }
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 7px;
 }
 .schedule-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
 }
 .schedule-card {
-  border-radius: 16px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.55);
   border: 1px solid rgba(148, 163, 184, 0.35);
-  padding: 22px;
+  padding: 11px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .schedule-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
+  gap: 6px;
 }
 .schedule-card-title {
   font-weight: 600;
   color: #0f172a;
+  font-size: 0.5rem;
 }
 .schedule-card-caption {
-  font-size: 0.85rem;
+  font-size: 0.42rem;
   color: rgba(17, 24, 39, 0.65);
-  margin-top: 2px;
+  margin-top: 1px;
 }
 .schedule-chip {
-  padding: 4px 10px;
+  padding: 2px 5px;
   border-radius: 999px;
   background: rgba(59, 130, 246, 0.15);
   color: #2563eb;
-  font-size: 0.75rem;
+  font-size: 0.37rem;
   font-weight: 600;
 }
 .schedule-card-body {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 9px;
 }
 .schedule-input {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 .schedule-input label {
-  font-size: 0.8rem;
+  font-size: 0.4rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: rgba(15, 23, 42, 0.65);
 }
 .schedule-input input {
-  border-radius: 10px;
+  border-radius: 5px;
   border: 1px solid rgba(148, 163, 184, 0.5);
-  padding: 12px 14px;
+  padding: 6px 7px;
   background: #fff;
   color: #0f172a;
-  font-size: 0.95rem;
+  font-size: 0.47rem;
   transition: border 0.15s ease, box-shadow 0.15s ease;
 }
 .schedule-input input:focus {
@@ -1029,7 +1025,7 @@ const bookingSummaryClass = (b: any) => {
 
 @media (max-width: 520px) {
   .schedule-card {
-    padding: 18px;
+    padding: 9px;
   }
   .schedule-card-body {
     grid-template-columns: 1fr;
@@ -1039,14 +1035,15 @@ const bookingSummaryClass = (b: any) => {
 .booking-modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 6px;
+  gap: 5px;
+  margin-top: 3px;
 }
 .btn {
   border: none;
-  border-radius: 10px;
-  padding: 10px 22px;
+  border-radius: 5px;
+  padding: 5px 11px;
   font-weight: 600;
+  font-size: 0.5rem;
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
 }

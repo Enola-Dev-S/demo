@@ -1,6 +1,5 @@
 import nodemailer from 'nodemailer'
 import dotenv from 'dotenv'
-
 dotenv.config()
 
 const EMAIL_USER = (process.env.EMAIL_USER || '').trim()
@@ -14,8 +13,8 @@ if (hasEmailCredentials) {
     port: 587,
     secure: false, // true for 465, false for other ports
     auth: {
-      user: 'canon@fatima.co.th' || '', // อีเมล @fatima.co.th
-      pass: 'mqnyygeyvfpnpkat' || ''  // App Password จาก Gmail
+      user: EMAIL_USER, // อีเมล @fatima.co.th
+      pass: EMAIL_PASSWORD // App Password จาก Gmail
     }
   })
 } else {
@@ -28,7 +27,7 @@ export async function sendBookingNotification({
   carName,
   userName,
   userEmail,
-  adminEmails = ['canon@fatima.co.th'],
+  adminEmails = ['no-reply@fatima.co.th'],
   action = 'created' // 'created', 'updated', 'cancelled'
 }) {
   try {
@@ -100,14 +99,14 @@ export async function sendBookingNotification({
               <span class="label">รถที่จอง:</span> ${carName || 'ไม่ระบุ'}
             </div>
             <div class="info-row">
-              <span class="label">วันที่และเวลาเริ่มต้น:</span> ${startDate}
+              <span class="label">วันที่และเวลาเริ่มต้น:</span> ${startDate} น.
             </div>
             <div class="info-row">
-              <span class="label">วันที่และเวลาสิ้นสุด:</span> ${endDate}
+              <span class="label">วันที่และเวลาสิ้นสุด:</span> ${endDate} น.
             </div>
             ${booking.purpose ? `
             <div class="info-row">
-              <span class="label">จุดประสงค์/ต้นทาง:</span> ${booking.purpose}
+              <span class="label">ต้นทาง:</span> ${booking.purpose}
             </div>
             ` : ''}
             ${booking.destination ? `
@@ -121,7 +120,8 @@ export async function sendBookingNotification({
             </div>
             <div class="footer">
               <p>อีเมลนี้ถูกส่งจากระบบจองรถอัตโนมัติ</p>
-              <p>Fatima R.B.D.S.</p>
+              <p>Copyright © 2025 FATIMA R.B.D.S. All rights reserved.</p>
+              <p>ติดต่อ : 081-234-5678 , 02-123-4567 </p>
             </div>
           </div>
         </div>
@@ -140,9 +140,6 @@ ${booking.purpose ? `จุดประสงค์/ต้นทาง: ${bookin
 ${booking.destination ? `ปลายทาง: ${booking.destination}\n` : ''}
 สถานะ: ${statusText}
 
----
-อีเมลนี้ถูกส่งจากระบบจองรถอัตโนมัติ
-Fatima R.B.D.S.
     `
 
     const recipients = []
@@ -166,7 +163,7 @@ Fatima R.B.D.S.
     }
 
     const mailOptions = {
-      from: `"ระบบจองรถ Fatima" <${EMAIL_USER || 'noreply@fatima.co.th'}>`,
+      from: `"ระบบจองรถ Fatima" <no-reply@fatima.co.th>`,
       to: uniqueRecipients.join(', '),
       subject: `${actionText} - ${carName || 'การจองรถ'}`,
       text: textContent,
