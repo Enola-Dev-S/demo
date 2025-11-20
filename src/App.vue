@@ -1,4 +1,3 @@
-vue\demo\src\App.vue
 <script setup lang="ts">
 import { RouterView } from "vue-router";
 import { useRouter } from "vue-router";

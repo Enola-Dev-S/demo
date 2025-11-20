@@ -8,7 +8,13 @@ import createCarRouter from './car.js'
 import createBookingRouter from './booking.js'
 import config from './config.js'
 import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 dotenv.config()
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 
 const app = express()
@@ -43,10 +49,13 @@ app.use('/api/car', createCarRouter(pool))
 app.use('/api/booking', createBookingRouter(pool))
 
 // serve uploaded images
-app.use('/imgcar', express.static('D:\\Dev\\imgcar'))
+// Use path.join for cross-platform compatibility
+// Check if process.env.UPLOAD_DIR is set, otherwise use default relative path
+const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, '../imgcar')
+app.use('/imgcar', express.static(uploadDir))
 
 // Routes
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.json({ message: 'API is running' })
 })
 
@@ -272,6 +281,19 @@ app.delete('/api/users/:id', async (req, res) => {
     console.error(err)
     res.status(500).json({ message: err.message })
   }
+})
+
+// Serve static files from the Vue app build directory
+const distDir = path.join(__dirname, '../dist')
+app.use(express.static(distDir))
+
+// Handle SPA routing: return index.html for any unknown api routes
+app.get(/(.*)/, (req, res) => {
+  // Don't intercept API routes that might have been missed (optional, but good practice)
+  if (req.url.startsWith('/api')) {
+     return res.status(404).json({ message: 'API route not found' })
+  }
+  res.sendFile(path.join(distDir, 'index.html'))
 })
 
 const port = config.port || 3000

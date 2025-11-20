@@ -1,0 +1,35 @@
+server 10.10.19.200
+root P@ssw0rd@FTM
+panudate P@ssw0rd
+
+pm2 stop all
+pm2 start all
+pm2 restart all
+pm2 status all
+
+ก่อน PowerShell uploadไฟล์
+sudo chown -R fatima:fatima /var/www/html/fatimaweb
+sudo chmod -R 755 /var/www/html/fatimaweb
+
+
+PowerShell 
+scp -r D:\dev\dist\ fatima@10.10.19.200:/var/www/html/fatimaweb/
+ scp -r D:\dev\server fatima@10.10.19.200:/var/www/html/fatimaweb/
+scp -r D:\dev\ecosystem.config.cjs fatima@10.10.19.200:/var/www/html/fatimaweb/
+
+
+/var/www/htlm/fatimaweb
+mysql -u fatima -p
+
+Fatima c@r-P@DB0nSv25
+
+sudo chown -R fatima:fatima /var/www/html/fatimaweb
+sudo chmod -R 755 /var/www/html/fatimaweb
+
+
+
+timedatectl
+
+
+
+
