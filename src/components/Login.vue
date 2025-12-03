@@ -43,8 +43,9 @@
                   stroke-linejoin="round"
                   stroke-width="2"
                   d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                /></svg
-              ><!-- icon svg -->
+                />
+              </svg>
+              <!-- icon svg -->
             </span>
             <input
               v-model="password"
@@ -143,7 +144,7 @@ const handleLogin = async () => {
       errors.password = data.message || "Invalid username or password";
     }
   } catch (error) {
-    errors.password = "Failed to connect to server";
+    errors.password = "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้";
     console.error("Login error:", error);
   } finally {
     loading.value = false;

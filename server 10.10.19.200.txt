@@ -1,6 +1,7 @@
 server 10.10.19.200
 root P@ssw0rd@FTM
 panudate P@ssw0rd
+mysql fatima c@r-P@DB0nSv25
 
 pm2 stop all
 pm2 start all
@@ -31,5 +32,21 @@ sudo chmod -R 755 /var/www/html/fatimaweb
 timedatectl
 
 
+
+
+
+
+
+ก่อน PowerShell uploadไฟล์
+sudo chown -R fatima:fatima /var/www/html/daily
+sudo chmod -R 755 /var/www/html/daily
+
+root@fatimaweb:/var/www/html/daily# nano .env
+root@fatimaweb:/var/www/html/daily# node server/db-test.js
+
+
+PS D:\Dev2> scp -r D:\Dev2\server\ fatima@10.10.19.200:/var/www/html/daily
+PS D:\Dev2> scp -r D:\Dev2\.env.production fatima@10.10.19.200:/var/www/html/daily
+PS D:\Dev2> scp -r D:\Dev2\dist\ fatima@10.10.19.200:/var/www/html/daily
 
 

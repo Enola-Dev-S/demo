@@ -32,6 +32,26 @@
           </li>
         </ul>
 
+        <!-- Booking Color Legend -->
+        <div class="hidden md:flex items-center space-x-6 bg-gray-700/50 px-4 py-2 rounded-lg border border-gray-600">
+          <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 rounded bg-gradient-to-r from-green-700 to-green-400 shadow-sm"></div>
+            <span class="text-xs text-gray-200 font-medium">1 Day</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 rounded bg-gradient-to-r from-violet-700 to-violet-400 shadow-sm"></div>
+            <span class="text-xs text-gray-200 font-medium">2 Days</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 rounded bg-gradient-to-r from-sky-700 to-sky-400 shadow-sm"></div>
+            <span class="text-xs text-gray-200 font-medium">3 Days</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-4 h-4 rounded bg-gradient-to-r from-red-500 to-red-200 shadow-sm"></div>
+            <span class="text-xs text-gray-200 font-medium">Cancel</span>
+          </div>
+        </div>
+
         <!-- user info -->
         <div class="flex items-center space-x-4">
           <div class="flex items-center space-x-4">

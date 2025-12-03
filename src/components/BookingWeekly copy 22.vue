@@ -682,6 +682,11 @@ const submitBooking = async () => {
   const msDay = 24 * 3600 * 1000;
   const durationDays =
     Math.ceil((new Date(endIso).getTime() - new Date(startIso).getTime()) / msDay) || 1;
+
+  if (durationDays > 3) {
+    formErrors.value.push("จองได้ไม่เกิน 3 วัน");
+    return;
+  }
   const useDurationRule = false; // อนาคตสามารถเปลี่ยนเป็น true เพื่อกลับมาใช้เงื่อนไขเดิม
   const computedStatus = useDurationRule ? (durationDays > 2 ? "pending" : "approved") : "approved";
 
@@ -822,9 +827,9 @@ const bookingSummaryClass = (b: any) => {
   }
   // 2 days -> indigo, >2 -> violet, else default sky
   const gradient =
-    days === 2
-      ? "from-indigo-700 to-indigo-400"
-      : days > 2
+    days === 1
+      ? "from-green-700 to-green-400"
+      : days === 2
       ? "from-violet-700 to-violet-400"
       : "from-sky-700 to-sky-400";
 
