@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-login-main">
-    <div class="bg-login-block">
+  <div class="min-h-[100dvh] flex items-center justify-center bg-login-main p-4 overflow-y-auto">
+    <div class="bg-login-block w-full max-w-md mx-auto">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold text-white">Welcome Fatima</h2>
         <p class="text-white mt-2">Please Sign In to Your Email Account</p>
@@ -25,7 +25,7 @@
             <input
               v-model="email"
               type="text"
-              class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-900"
               :class="{ 'border-red-500': errors.email }"
               placeholder="Enter your Email"
             />
@@ -50,7 +50,7 @@
             <input
               v-model="password"
               type="password"
-              class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-900"
               :class="{ 'border-red-500': errors.password }"
               placeholder="Enter your password"
             />

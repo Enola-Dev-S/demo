@@ -1,12 +1,12 @@
 <template>
-  <div class="p-2 w-full bg-gray-100 rounded-xl">
+  <div :class="isMobile ? 'w-full bg-gray-100 h-[calc(100dvh-80px)] flex flex-col' : 'p-2 w-full bg-gray-100 rounded-xl'">
     <!-- Header -->
     <div
-      class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100"
+      class="flex-none flex flex-col xl:flex-row justify-between items-center gap-4 mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100"
     >
       <!-- Navigation Group -->
-      <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-        <div class="flex items-center bg-gray-100 p-1 rounded-xl">
+      <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
+        <div class="flex items-center bg-gray-100 p-1 rounded-xl w-full md:w-auto justify-between md:justify-start">
           <button
             @click="prevWeek"
             class="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900"
@@ -21,7 +21,7 @@
                 fill-rule="evenodd"
                 d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
                 clip-rule="evenodd"
-              />
+                />
             </svg>
           </button>
           <span class="px-4 font-semibold text-gray-700 min-w-[140px] text-center text-sm">{{
@@ -41,17 +41,17 @@
                 fill-rule="evenodd"
                 d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
                 clip-rule="evenodd"
-              />
+                />
             </svg>
           </button>
         </div>
 
-        <div class="relative">
+        <div class="relative w-full md:w-auto">
           <input
             type="date"
             v-model="pickedDate"
             @change="jumpToDate"
-            class="pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition-all hover:bg-white"
+            class="w-full md:w-auto pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition-all hover:bg-white"
           />
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -72,112 +72,126 @@
 
       <!-- Actions Group -->
        
-      <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
-        <!-- Select resolution -->
+      <div class="flex flex-col md:flex-row items-center gap-3 w-full xl:w-auto justify-end">
+        <div class="flex w-full md:w-auto gap-3">
+          <!-- Select resolution -->
           <select
+            v-if="!isMobile"
             v-model="resolution"
-            class="appearance-none pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-gray-300 focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition-all cursor-pointer min-w-[160px]"
+            class="flex-1 md:flex-none appearance-none pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-gray-300 focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition-all cursor-pointer min-w-[100px]"
           >
-            <option value="Small">Small</option>
-            <option value="Large">Large</option>
+            <option value="Small">เล็ก</option>
+            <option value="Large">ใหญ่</option>
           </select>   
-        <div class="relative group">
-          <!-- Select -->
-          <select
-            v-model="filterCar"
-            @change="loadWeek"
-            class="appearance-none pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-gray-300 focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition-all cursor-pointer min-w-[160px]"
-          >
-            <option value="">All Cars</option>
-            <option v-for="c in cars" :key="c.id" :value="c.id">{{ c.name }}</option>
-          </select>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none group-hover:text-gray-600 transition-colors"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-            />
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
+          
+          <div class="relative group flex-1 md:flex-none">
+            <!-- Select -->
+            <select
+              v-model="filterCar"
+              @change="loadWeek"
+              class="w-full appearance-none pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-gray-300 focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition-all cursor-pointer min-w-[160px]"
+            >
+              <option value="">รถทั้งหมด</option>
+              <option v-for="c in cars" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none group-hover:text-gray-600 transition-colors"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+              />
+            </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
         </div>
 
-        <div class="h-8 w-px bg-gray-200 hidden md:block mx-1"></div>
+        <div class="h-8 w-px bg-gray-200 hidden xl:block mx-1"></div>
 
-        <button
-          @click="loadWeek"
-          class="p-2.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all duration-200"
-          title="Refresh"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+        <div class="flex w-full md:w-auto gap-3">
+          <button
+            @click="loadWeek"
+            class="hidden md:block p-2.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all duration-200"
+            title="Refresh"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+          </button>
 
-        <button
-          @click="openBooking(null)"
-          class="flex items-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-gray-200 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+          <button
+            v-if="!isMobile"
+            @click="openBooking(null)"
+            class="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-xl shadow-lg shadow-gray-200 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          New Booking
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            จองรถใหม่
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- resolution -->
     
+    <BookingMobile
+      v-if="isMobile"
+      ref="bookingMobileRef"
+      class="flex-1 overflow-y-auto"
+      :start-date="weekStartDate"
+      :filter-car="filterCar"
+    />
 
     <BookingSmall 
-      v-if="resolution === 'Small'" 
+      v-if="!isMobile && resolution === 'Small'" 
       ref="bookingSmallRef"
       :start-date="weekStartDate" 
       :filter-car="filterCar"
     />
     <BookingLarge 
-      v-if="resolution === 'Large'" 
+      v-if="!isMobile && resolution === 'Large'" 
       ref="bookingLargeRef"
       :start-date="weekStartDate" 
       :filter-car="filterCar"
@@ -186,14 +200,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { API_BASE } from "@/config";
 import BookingSmall from "./BookingWeekly copy 22.vue";
 import BookingLarge from "./BookingWeekly copy 33.vue";
+import BookingMobile from "./BookingMobile.vue";
 
 const resolution = ref("Small");
 const bookingSmallRef = ref<any>(null);
 const bookingLargeRef = ref<any>(null);
+const bookingMobileRef = ref<any>(null);
+const isMobile = ref(false);
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 768;
+};
 
 // helper: format date as YYYY-MM-DD in local timezone (avoid toISOString timezone shift)
 const pad = (n: number) => n.toString().padStart(2, "0");
@@ -262,19 +283,10 @@ const loadCars = async () => {
   cars.value = data.data || [];
 };
 
-// We don't need loadWeek here anymore as children handle it, 
-// but the refresh button calls it. We can make it trigger children refresh?
-// Actually, if we just update a key or something, it might re-render.
-// But the simplest way is to expose a refresh method on children too, or just ignore it if the children auto-refresh on prop change.
-// The refresh button calls loadWeek. Let's make loadWeek call children's loadWeek if available?
-// Or just remove the refresh button logic for now since children watch props.
-// But the user might want to manually refresh.
-// Let's keep loadWeek but make it call child's loadWeek?
-// Child components watch props. If we want to force refresh, we can maybe toggle a 'refreshKey' prop?
-// Or just access the ref.
-
 const loadWeek = async () => {
-  if (resolution.value === 'Small' && bookingSmallRef.value) {
+  if (isMobile.value && bookingMobileRef.value) {
+    await bookingMobileRef.value.loadWeek();
+  } else if (resolution.value === 'Small' && bookingSmallRef.value) {
     await bookingSmallRef.value.loadWeek();
   } else if (resolution.value === 'Large' && bookingLargeRef.value) {
     await bookingLargeRef.value.loadWeek();
@@ -285,11 +297,21 @@ const loadAll = async () => {
   await loadCars();
 };
 
-onMounted(loadAll);
+onMounted(() => {
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
+  loadAll();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", checkMobile);
+});
 
 // booking actions
 const openBooking = (car: any | null) => {
-  if (resolution.value === 'Small' && bookingSmallRef.value) {
+  if (isMobile.value && bookingMobileRef.value) {
+    bookingMobileRef.value.openBooking(car);
+  } else if (resolution.value === 'Small' && bookingSmallRef.value) {
     bookingSmallRef.value.openBooking(car);
   } else if (resolution.value === 'Large' && bookingLargeRef.value) {
     bookingLargeRef.value.openBooking(car);

@@ -4,34 +4,43 @@ import UserManagement from "./admin/UserManagement.vue";
 import CarManagement from "./admin/CarManagement.vue";
 
 const activeMenu = ref("cars"); // default to users view
+const isSidebarOpen = ref(false);
 </script>
 
 <template>
-  <div class="flex h-screen bg-gray-50 font-sans text-gray-900">
+  <div class="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
+    <!-- Mobile Sidebar Backdrop -->
+    <div 
+      v-if="isSidebarOpen" 
+      @click="isSidebarOpen = false"
+      class="fixed inset-0 bg-black/50 z-20 lg:hidden"
+    ></div>
+
     <!-- Sidebar -->
     <aside
-      class="w-96 bg-white border-r border-gray-200 flex flex-col shadow-sm z-10 transition-all duration-300"
+      class="fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm z-30 transition-transform duration-300 lg:translate-x-0 lg:static lg:w-80"
+      :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
     >
       <!-- Logo / Header -->
-      <div class="h-28 flex items-center px-10 border-b border-gray-100">
+      <div class="h-20 lg:h-28 flex items-center px-6 lg:px-10 border-b border-gray-100">
         <div class="flex items-center gap-4">
           <div
-            class="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-gray-200"
+            class="w-10 h-10 lg:w-12 lg:h-12 bg-gray-900 rounded-xl flex items-center justify-center text-white font-bold text-xl lg:text-2xl shadow-lg shadow-gray-200"
           >
             A
           </div>
-          <h1 class="text-3xl font-bold tracking-tight text-gray-900">Admin Panel</h1>
+          <h1 class="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900">Admin Panel</h1>
         </div>
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 overflow-y-auto py-8 px-6 space-y-2">
+      <nav class="flex-1 overflow-y-auto py-6 lg:py-8 px-4 lg:px-6 space-y-2">
         <div class="px-4 mb-3 text-sm font-semibold text-gray-400 uppercase tracking-wider">
           Main Menu
         </div>
 
         <button
-          @click="activeMenu = 'cars'"
+          @click="activeMenu = 'cars'; isSidebarOpen = false"
           :class="[
             'w-full flex items-center gap-4 px-6 py-4 text-base font-medium rounded-2xl transition-all duration-200 group',
             activeMenu === 'cars'
@@ -60,7 +69,7 @@ const activeMenu = ref("cars"); // default to users view
         </button>
 
         <button
-          @click="activeMenu = 'users'"
+          @click="activeMenu = 'users'; isSidebarOpen = false"
           :class="[
             'w-full flex items-center gap-4 px-6 py-4 text-base font-medium rounded-2xl transition-all duration-200 group',
             activeMenu === 'users'
@@ -90,9 +99,9 @@ const activeMenu = ref("cars"); // default to users view
       </nav>
 
       <!-- Footer User Profile (Optional) -->
-      <div class="p-6 border-t border-gray-100">
+      <div class="p-4 lg:p-6 border-t border-gray-100">
         <div
-          class="flex items-center gap-4 px-6 py-4 rounded-2xl bg-gray-50 border border-gray-100"
+          class="flex items-center gap-4 px-4 lg:px-6 py-4 rounded-2xl bg-gray-50 border border-gray-100"
         >
           <div
             class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-bold"
@@ -108,18 +117,30 @@ const activeMenu = ref("cars"); // default to users view
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-auto relative">
-      <!-- Top Bar (Optional for mobile trigger or breadcrumbs) -->
+    <main class="flex-1 overflow-auto relative w-full">
+      <!-- Top Bar -->
       <header
-        class="h-28 bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-20 px-10 flex items-center justify-between"
+        class="h-20 lg:h-28 bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-20 px-6 lg:px-10 flex items-center justify-between"
       >
-        <h2 class="text-2xl font-semibold text-gray-800">
-          {{ activeMenu === "cars" ? "Car Management" : "User Management" }}
-        </h2>
+        <div class="flex items-center gap-4">
+          <!-- Hamburger Menu -->
+          <button 
+            @click="isSidebarOpen = !isSidebarOpen"
+            class="lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          
+          <h2 class="text-xl lg:text-2xl font-semibold text-gray-800">
+            {{ activeMenu === "cars" ? "Car Management" : "User Management" }}
+          </h2>
+        </div>
         <!-- Right side actions if needed -->
       </header>
 
-      <div class="p-10">
+      <div class="p-4 lg:p-10">
         <transition
           enter-active-class="transition ease-out duration-200"
           enter-from-class="opacity-0 translate-y-2"

@@ -5,8 +5,8 @@
 
     <!-- Weekly grid -->
     <div class="bg-white rounded shadow overflow-auto max-h-[calc(100vh-200px)]">
-      <div class="grid grid-cols-[260px_1fr] border-b bg-gray-50 sticky top-0 z-10">
-        <div class="p-2 text-sm font-medium border-r">Car / Day</div>
+      <div class="grid grid-cols-[260px_1fr] border-b bg-gray-50 sticky top-0 z-10 min-w-[1024px]">
+        <div class="p-2 text-sm font-medium border-r sticky left-0 bg-gray-50 z-20 shadow-sm">รถ / วันที่</div>
         <div class="flex">
           <div v-for="d in weekDays" :key="d.date" class="flex-1 text-center p-2 text-sm border-l">
             <div class="font-semibold">{{ d.labelShort }}</div>
@@ -15,10 +15,10 @@
         </div>
       </div>
 
-      <div>
+      <div class="min-w-[1024px]">
         <div v-for="car in filteredCars" :key="car.id" class="grid grid-cols-[260px_1fr] border-t">
           <!-- car column -->
-          <div class="p-3 border-r">
+          <div class="p-3 border-r sticky left-0 bg-white z-10 shadow-sm">
             <div class="font-medium">{{ car.name }}</div>
             <div class="flex items-center gap-2 mt-1 flex-wrap">
               <div :class="`inline-block px-2 py-0.5 rounded text-xxs ${statusClass(car.status)}`">
@@ -40,13 +40,13 @@
                 @click="openBooking(car)"
                 class="text-sm w-full px-2 py-1 bg-green-200 hover:bg-green-00 text-green-700 rounded"
               >
-                จอง-Booking
+                จอง
               </button>
               <button
                 @click="viewHistory(car)"
                 class="text-sm w-full px-2 py-1 bg-gray-200 hover:bg-gray-100 rounded"
               >
-                ประวัติ-History
+                ประวัติ
               </button>
             </div>
           </div>
@@ -100,7 +100,7 @@
                       @click.stop="showCancelConfirm(b)"
                       class="text-xxs px-2 py-0.5 bg-white/20 rounded hover:bg-white/50 hover:text-white-900"
                     >
-                      Cancel
+                      ยกเลิก
                     </button>
                     <button
                       v-if="
@@ -110,13 +110,13 @@
                       @click.stop="openBookingEdit(b)"
                       class="text-xxs px-2 py-0.5 bg-white/20 rounded hover:bg-white/50 hover:text-white-900"
                     >
-                      Edit
+                      แก้ไข
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div v-else class="text-xs text-gray-200 text-center py-4">Not Booking</div>
+              <div v-else class="text-xs text-gray-200 text-center py-4">ไม่มีการจอง</div>
             </div>
           </div>
         </div>
@@ -135,7 +135,7 @@
                 {{ editingBooking ? "แก้ไขการจอง" : "สร้างการจองใหม่" }}
               </p>
               <h3 class="booking-modal-title">
-                {{ editingBooking ? "Edit Booking" : "New Booking" }}
+                {{ editingBooking ? "แก้ไขการจอง" : "สร้างการจองใหม่" }}
               </h3>
             </div>
           </div>
@@ -149,14 +149,14 @@
             </div>
 
             <div class="form-group">
-              <label>SelectCar-เลือกรถ</label>
+              <label>เลือกรถ</label>
               <select v-model="form.car_id" required>
                 <option v-for="c in cars" :key="c.id" :value="c.id">{{ c.name }}</option>
               </select>
             </div>
 
             <div v-if="isAdmin" class="form-group">
-              <label>จองให้ผู้ใช้ (Book for User)</label>
+              <label>จองให้ผู้ใช้</label>
               <select v-model="form.user_id" required>
                 <option value="" disabled>เลือกผู้ใช้</option>
                 <option v-for="u in users" :key="u.id" :value="u.id">
@@ -172,7 +172,7 @@
                     <p class="schedule-card-title">ช่วงเวลาเริ่มต้น</p>
                     <p class="schedule-card-caption">วันที่และเวลารับรถ</p>
                   </div>
-                  <span class="schedule-chip">Start</span>
+                  <span class="schedule-chip">เริ่ม</span>
                 </div>
 
                 <div class="schedule-card-body">
@@ -193,7 +193,7 @@
                     <p class="schedule-card-title">ช่วงเวลาสิ้นสุด</p>
                     <p class="schedule-card-caption">วันที่และเวลาคืนรถ</p>
                   </div>
-                  <span class="schedule-chip">End</span>
+                  <span class="schedule-chip">สิ้นสุด</span>
                 </div>
 
                 <div class="schedule-card-body">
@@ -210,12 +210,12 @@
             </div>
 
             <div class="form-group">
-              <label>Purpose-ต้นทาง</label>
+              <label>ต้นทาง</label>
               <input v-model="form.purpose" type="text" placeholder="Fatima R.B.D.S." />
             </div>
 
             <div class="form-group">
-              <label>Destination-ปลายทาง</label>
+              <label>ปลายทาง</label>
               <input
                 v-model="form.destination"
                 type="text"
@@ -238,33 +238,35 @@
     <transition name="modal">
       <div v-if="showHistory" class="fixed inset-0 z-50 flex items-center justify-center">
         <div class="absolute inset-0 bg-black/40" @click="showHistory = false"></div>
-        <div class="bg-white rounded-2xl shadow-lg z-50 w-full max-w-3xl p-8">
-          <h3 class="text-lg font-semibold mb-2">History - {{ historyCar?.name }}</h3>
+        <div class="bg-white rounded-2xl shadow-lg z-50 w-full max-w-3xl p-4 md:p-8 m-4">
+          <h3 class="text-lg font-semibold mb-2">ประวัติ - {{ historyCar?.name }}</h3>
           <div class="max-h-80 overflow-auto">
-            <table class="w-full text-sm">
-              <thead class="bg-gray-100">
-                <tr>
-                  <th class="p-2">#</th>
-                  <th class="p-2">User</th>
-                  <th class="p-2">From</th>
-                  <th class="p-2">To</th>
-                  <th class="p-2">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(h, i) in history" :key="h.id" class="border-t">
-                  <td class="p-2">{{ i + 1 }}</td>
-                  <td class="p-2">{{ h.user_name || h.user_id }}</td>
-                  <td class="p-2">{{ formatDatetime(h.start_datetime) }}</td>
-                  <td class="p-2">{{ formatDatetime(h.end_datetime) }}</td>
-                  <td class="p-2">{{ h.status }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm min-w-[500px]">
+                  <thead class="bg-gray-100">
+                    <tr>
+                      <th class="p-2 text-left">#</th>
+                      <th class="p-2 text-left">ผู้ใช้</th>
+                      <th class="p-2 text-left">เริ่ม</th>
+                      <th class="p-2 text-left">ถึง</th>
+                      <th class="p-2 text-left">สถานะ</th>
+                    </tr>
+                  </thead>
+                <tbody>
+                  <tr v-for="(h, i) in history" :key="h.id" class="border-t">
+                    <td class="p-2">{{ i + 1 }}</td>
+                    <td class="p-2">{{ h.user_name || h.user_id }}</td>
+                    <td class="p-2 whitespace-nowrap">{{ formatDatetime(h.start_datetime) }}</td>
+                    <td class="p-2 whitespace-nowrap">{{ formatDatetime(h.end_datetime) }}</td>
+                    <td class="p-2">{{ h.status }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <div class="mt-3 text-right">
-            <button @click="showHistory = false" class="px-3 py-1 bg-gray-200 rounded">
-              Close
+            <button @click="showHistory = false" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors">
+              ปิด
             </button>
           </div>
         </div>
@@ -728,7 +730,7 @@ const submitBooking = async () => {
 };
 
 const cancelBooking = async (b: any) => {
-  if (!confirm("Confirm cancel booking?")) return;
+  if (!confirm("ยืนยันการยกเลิกการจอง?")) return;
   const res = await fetch(`${API_BASE}/api/booking/${b.id}/cancel`, { method: "PUT" });
   if (res.ok) await loadWeek();
 };

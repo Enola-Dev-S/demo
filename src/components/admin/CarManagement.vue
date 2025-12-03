@@ -1,6 +1,6 @@
 ```
 <template>
-  <div class="p-10 max-w-7xl mx-auto">
+  <div class="w-full max-w-7xl mx-auto">
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6">
       <div>
