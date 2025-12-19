@@ -8,7 +8,7 @@ const isSidebarOpen = ref(false);
 </script>
 
 <template>
-  <div class="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
+  <div class="flex h-[100dvh] bg-gray-50 font-sans text-gray-900 overflow-hidden">
     <!-- Mobile Sidebar Backdrop -->
     <div 
       v-if="isSidebarOpen" 
@@ -18,7 +18,7 @@ const isSidebarOpen = ref(false);
 
     <!-- Sidebar -->
     <aside
-      class="fixed inset-y-0 left-0 w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm z-30 transition-transform duration-300 lg:translate-x-0 lg:static lg:w-80"
+      class="fixed top-0 bottom-0 left-0 w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm z-50 transition-transform duration-300 lg:translate-x-0 lg:static lg:w-80 lg:h-auto"
       :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
     >
       <!-- Logo / Header -->
@@ -99,9 +99,9 @@ const isSidebarOpen = ref(false);
       </nav>
 
       <!-- Footer User Profile (Optional) -->
-      <div class="p-4 lg:p-6 border-t border-gray-100">
+      <div class="p-2 lg:px-5 border-t border-gray-100 pb-32">
         <div
-          class="flex items-center gap-4 px-4 lg:px-6 py-4 rounded-2xl bg-gray-50 border border-gray-100"
+          class="flex items-center gap-4 px-2 lg:px-5 py-3 rounded-2xl bg-gray-50 border border-gray-100"
         >
           <div
             class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-bold"
@@ -110,7 +110,7 @@ const isSidebarOpen = ref(false);
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-base font-medium text-gray-900 truncate">Administrator</p>
-            <p class="text-sm text-gray-500 truncate">admin@system.com</p>
+            <p class="text-sm text-gray-500 truncate">System@fatima.co.th</p>
           </div>
         </div>
       </div>

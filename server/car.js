@@ -9,7 +9,7 @@ export default function createCarRouter(pool) {
   const TABLE = 'car' // เปลี่ยนถ้าจำเป็น
 
   // ensure upload dir
-  const UPLOAD_DIR = '/var/www/html/fatimaweb/imgcar/'
+  const UPLOAD_DIR = './imgcar/'
   if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true })
 
   const storage = multer.diskStorage({

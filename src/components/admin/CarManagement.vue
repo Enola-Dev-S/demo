@@ -1,6 +1,6 @@
 ```
 <template>
-  <div class="w-full max-w-7xl mx-auto">
+  <div class="w-full max-w-7xl mx-auto pb-24">
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6">
       <div>
@@ -205,7 +205,7 @@
         ></div>
 
         <div
-          class="bg-white rounded-3xl shadow-2xl z-50 w-full max-w-4xl overflow-hidden transform transition-all scale-100"
+          class="bg-white rounded-3xl shadow-2xl z-50 w-full max-w-4xl overflow-hidden transform transition-all scale-100 max-h-[90vh] overflow-y-auto"
         >
           <!-- Modal Header -->
           <div
@@ -443,7 +443,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { API_BASE } from "@/config";
+import { API_BASE, authHeader } from "@/config";
 
 interface Car {
   id?: number;
@@ -573,7 +573,7 @@ const handleSubmit = async () => {
       body.append("img", formData.value.img);
     }
 
-    await fetch(url, { method, body });
+    await fetch(url, { method, body, headers: authHeader() });
     await loadCars();
     closeForm();
   } catch (error) {
@@ -589,7 +589,7 @@ const confirmDelete = (id: number) => {
 const doDelete = async () => {
   if (!confirmDeleteId.value) return;
   try {
-    await fetch(`${apiBase}/${confirmDeleteId.value}`, { method: "DELETE" });
+    await fetch(`${apiBase}/${confirmDeleteId.value}`, { method: "DELETE", headers: authHeader() });
     showDelete.value = false;
     await loadCars();
   } catch (error) {
@@ -614,7 +614,7 @@ const resetForm = () => {
 
 const loadCars = async () => {
   try {
-    const res = await fetch(apiBase);
+    const res = await fetch(apiBase, { headers: authHeader() });
     const data = await res.json();
     const rows = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
     cars.value = rows.map(

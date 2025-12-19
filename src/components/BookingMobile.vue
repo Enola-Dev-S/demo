@@ -312,6 +312,83 @@
       </div>
     </transition>
 
+    <!-- Day List Modal (Multiple Bookings) -->
+    <transition name="modal">
+      <div v-if="showDayList" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showDayList = false"></div>
+        <div class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6 border border-gray-100 max-h-[85vh] flex flex-col">
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-4 flex-none">
+            <div>
+              <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                {{ dayListDate ? new Date(dayListDate).toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long' }) : '' }}
+              </p>
+              <h3 class="text-lg font-bold text-gray-900">รายการจอง ({{ dayListBookings.length }})</h3>
+            </div>
+            <button @click="showDayList = false" class="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- List -->
+          <div class="overflow-y-auto flex-1 space-y-3 pr-1 scrollbar-hide">
+            <div 
+              v-for="(booking, idx) in dayListBookings" 
+              :key="booking.id"
+              @click="selectBookingFromList(booking)"
+              class="group p-4 rounded-2xl border border-gray-100 hover:border-blue-200 bg-gray-50 hover:bg-blue-50/50 transition-all cursor-pointer active:scale-[0.98]"
+            >
+              <div class="flex justify-between items-start mb-2">
+                <span class="text-xs font-bold text-gray-400 group-hover:text-blue-400 transition-colors">#{{ idx + 1 }}</span>
+                <span :class="`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${statusClass(booking.status)}`">
+                  {{ booking.status }}
+                </span>
+              </div>
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sm shadow-sm border border-gray-100">
+                  👤
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-gray-900 leading-tight">
+                    {{ booking.user_name || booking.user_id }}
+                  </p>
+                  <p class="text-[10px] text-gray-500 truncate max-w-[150px]">
+                    {{ booking.purpose || 'ไม่มีรายละเอียด' }}
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 text-xs text-gray-600 bg-white p-2 rounded-lg border border-gray-100/50">
+                <div class="flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                  {{ new Date(booking.start_datetime).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) }}
+                </div>
+                <span class="text-gray-300">→</span>
+                <div class="flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                  {{ new Date(booking.end_datetime).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer Actions -->
+          <!-- <div class="mt-4 pt-4 border-t border-gray-100 flex-none">
+            <button 
+              @click="openNewBookingFromList"
+              class="w-full py-3 bg-gray-900 text-white font-bold rounded-xl shadow-lg shadow-gray-200 hover:bg-gray-800 active:transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              เพิ่มการจองใหม่
+            </button>
+           </div> -->
+        </div>
+      </div>
+    </transition>
+
     <!-- Cancel confirmation modal -->
     <transition name="modal">
       <div
@@ -373,7 +450,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
-import { API_BASE } from "@/config";
+import { API_BASE, authHeader } from "@/config";
 
 // helper: format date as YYYY-MM-DD in local timezone
 const pad = (n: number) => n.toString().padStart(2, "0");
@@ -539,14 +616,14 @@ const form = ref({
 const formErrors = ref<string[]>([]);
 
 const loadCars = async () => {
-  const res = await fetch(`${API_BASE}/api/car`);
+  const res = await fetch(`${API_BASE}/api/car`, { headers: authHeader() });
   const data = await res.json();
   cars.value = data.data || [];
   if (!form.value.car_id && cars.value.length) form.value.car_id = cars.value[0].id;
 };
 
 const loadUsers = async () => {
-  const res = await fetch(`${API_BASE}/api/users`);
+  const res = await fetch(`${API_BASE}/api/users`, { headers: authHeader() });
   const data = await res.json();
   users.value = data.data || [];
 };
@@ -565,7 +642,7 @@ const loadWeek = async () => {
   params.set("end", weekEnd.toISOString());
   if (props.filterCar) params.set("car_id", String(props.filterCar));
 
-  const res = await fetch(`${API_BASE}/api/booking?${params.toString()}`);
+  const res = await fetch(`${API_BASE}/api/booking?${params.toString()}`, { headers: authHeader() });
   const data = await res.json();
   bookings.value = data.data || [];
 
@@ -715,7 +792,7 @@ const submitBooking = async () => {
     const method = form.value.id ? "PUT" : "POST";
     const res = await fetch(url, {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeader() },
       body: JSON.stringify(payload),
     });
     if (res.ok) {
@@ -739,7 +816,7 @@ const submitBooking = async () => {
 };
 
 const viewHistory = async (car: any) => {
-  const res = await fetch(`${API_BASE}/api/booking/car/${car.id}/history`);
+  const res = await fetch(`${API_BASE}/api/booking/car/${car.id}/history`, { headers: authHeader() });
   const data = await res.json();
   history.value = data.data || [];
   historyCar.value = car;
@@ -752,6 +829,26 @@ const cancelTarget = ref<any | null>(null);
 const closeCancel = () => {
   cancelModalVisible.value = false;
   cancelTarget.value = null;
+};
+
+// Day List Logic
+const showDayList = ref(false);
+const dayListBookings = ref<any[]>([]);
+const dayListDate = ref("");
+const dayListCar = ref<any>(null);
+
+const selectBookingFromList = (booking: any) => {
+  showDayList.value = false;
+  openBookingEdit(booking);
+};
+
+const openNewBookingFromList = () => {
+  showDayList.value = false;
+  if (dayListCar.value && dayListDate.value) {
+    openBooking(dayListCar.value);
+    form.value.start_date = dayListDate.value;
+    form.value.end_date = dayListDate.value;
+  }
 };
 
 // helper to get car name for cancel modal (safe)
@@ -774,7 +871,7 @@ const smallFormat = (iso?: string) => {
 // perform cancel without built-in confirm (used by modal)
 const performCancel = async (b: any) => {
   try {
-    const res = await fetch(`${API_BASE}/api/booking/${b.id}/cancel`, { method: "PUT" });
+    const res = await fetch(`${API_BASE}/api/booking/${b.id}/cancel`, { method: "PUT", headers: authHeader() });
     if (!res.ok) {
       const data = await res.json().catch(() => ({ message: "ยกเลิกไม่สำเร็จ" }));
       showPopup(data.message || "ยกเลิกไม่สำเร็จ", { type: "error" });
@@ -833,8 +930,14 @@ const handleDayClick = (car: any, day: any) => {
   const dayKey = day.date;
   const dayBookings = bookingsByCarDay.value[carId]?.[dayKey] || [];
 
-  if (dayBookings.length > 0) {
-    // Show first booking details
+  if (dayBookings.length > 1) {
+    // Multiple bookings: Show list
+    dayListBookings.value = dayBookings;
+    dayListDate.value = dayKey;
+    dayListCar.value = car;
+    showDayList.value = true;
+  } else if (dayBookings.length === 1) {
+    // Single booking: Show details directly
     openBookingEdit(dayBookings[0]);
   } else {
     // New booking

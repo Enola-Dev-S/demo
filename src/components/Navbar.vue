@@ -7,7 +7,7 @@
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <img
-              src="@/assets/fatima.png"
+              src="@/assets/Fatima.png"
               class="h-10 w-auto rounded-lg shadow-xl hover:scale-105 transition-transform duration-300"
               alt="Logo"
             />

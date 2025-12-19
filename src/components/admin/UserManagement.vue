@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { API_BASE } from "@/config";
+import { API_BASE, authHeader } from "@/config";
 
 interface User {
   id?: number;
@@ -24,7 +24,7 @@ const roles = ["user", "administrator"];
 
 const loadUsers = async () => {
   try {
-    const res = await fetch(`${API_BASE}/api/users`);
+    const res = await fetch(`${API_BASE}/api/users`, { headers: authHeader() });
     const data = await res.json();
     if (data.success) users.value = data.data;
     else {
@@ -57,16 +57,16 @@ const handleSubmit = async () => {
       }
       const res = await fetch(`${API_BASE}/api/users/${editingUser.value.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeader() },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Update failed");
     } else {
       // Add new user - password required
-      const res = await fetch(`${API_BASE}/api/adduser`, {
+      const res = await fetch(`${API_BASE}/api/users`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeader() },
         body: JSON.stringify({
           name: formData.value.name,
           email: formData.value.email,
@@ -102,7 +102,7 @@ const openDeleteModal = (user: User) => {
 const doDelete = async () => {
   if (!deleteTarget.value?.id) return;
   try {
-    const res = await fetch(`${API_BASE}/api/users/${deleteTarget.value.id}`, { method: "DELETE" });
+    const res = await fetch(`${API_BASE}/api/users/${deleteTarget.value.id}`, { method: "DELETE", headers: authHeader() });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       throw new Error(data.message || "Delete failed");
@@ -119,7 +119,7 @@ onMounted(() => loadUsers());
 </script>
 
 <template>
-  <div class="w-full max-w-7xl mx-auto">
+  <div class="w-full max-w-7xl mx-auto pb-24">
     <!-- Header Section -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-6">
       <div>
@@ -159,7 +159,7 @@ onMounted(() => loadUsers());
     >
       <div
         v-if="showForm"
-        class="mb-10 bg-white border border-gray-100 rounded-3xl shadow-xl overflow-hidden"
+        class="mb-10 bg-white border border-gray-100 rounded-3xl shadow-xl overflow-hidden max-h-[90vh] overflow-y-auto"
       >
         <div
           class="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center"

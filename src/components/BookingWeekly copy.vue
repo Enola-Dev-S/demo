@@ -478,7 +478,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
-import { API_BASE } from "@/config";
+import { API_BASE, authHeader } from "@/config";
 
 // helper: format date as YYYY-MM-DD in local timezone (avoid toISOString timezone shift)
 const pad = (n: number) => n.toString().padStart(2, "0");
@@ -574,9 +574,6 @@ console.log("userRole=", userRole.value);
 const isAdmin = computed(() =>
   ["administrator", "superadmin"].includes(String(userRole.value).toLowerCase())
 );
-const isNotCancelled = computed(
-  () => !["cancelled"].includes(String(userRole.value).toLowerCase())
-);
 const isOwner = (b: any) => Number(b?.user_id) === Number(customerId.value);
 
 function statusClass(status = "") {
@@ -653,14 +650,14 @@ const form = ref({
 const formErrors = ref<string[]>([]);
 
 const loadCars = async () => {
-  const res = await fetch(`${API_BASE}/api/car`);
+  const res = await fetch(`${API_BASE}/api/car`, { headers: authHeader() });
   const data = await res.json();
   cars.value = data.data || [];
   if (!form.value.car_id && cars.value.length) form.value.car_id = cars.value[0].id;
 };
 
 const loadUsers = async () => {
-  const res = await fetch(`${API_BASE}/api/users`);
+  const res = await fetch(`${API_BASE}/api/users`, { headers: authHeader() });
   const data = await res.json();
   users.value = data.data || [];
 };
@@ -687,7 +684,7 @@ const loadWeek = async () => {
     filterCar.value
   );
 
-  const res = await fetch(`${API_BASE}/api/booking?${params.toString()}`);
+  const res = await fetch(`${API_BASE}/api/booking?${params.toString()}`, { headers: authHeader() });
   const data = await res.json();
   bookings.value = data.data || [];
   console.log("[BookingWeekly] bookings fetched:", bookings.value.length);
@@ -748,11 +745,6 @@ onMounted(loadAll);
 const formatTime = (iso: string) =>
   new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 const formatDatetime = (iso: string) => new Date(iso).toLocaleString();
-const canCancel = (b: any) =>
-  b &&
-  b.status !== "cancelled" &&
-  b.status !== "completed" &&
-  new Date(b.start_datetime).getTime() >= Date.now() - 5 * 60000;
 
 // booking actions
 const openBooking = (car: any | null) => {
@@ -867,14 +859,9 @@ const submitBooking = async () => {
   }
 };
 
-const cancelBooking = async (b: any) => {
-  if (!confirm("Confirm cancel booking?")) return;
-  const res = await fetch(`${API_BASE}/api/booking/${b.id}/cancel`, { method: "PUT" });
-  if (res.ok) await loadWeek();
-};
 
 const viewHistory = async (car: any) => {
-  const res = await fetch(`${API_BASE}/api/booking/car/${car.id}/history`);
+  const res = await fetch(`${API_BASE}/api/booking/car/${car.id}/history`, { headers: authHeader() });
   const data = await res.json();
   history.value = data.data || [];
   historyCar.value = car;
@@ -914,7 +901,7 @@ const smallFormat = (iso?: string) => {
 // perform cancel without built-in confirm (used by modal)
 const performCancel = async (b: any) => {
   try {
-    const res = await fetch(`${API_BASE}/api/booking/${b.id}/cancel`, { method: "PUT" });
+    const res = await fetch(`${API_BASE}/api/booking/${b.id}/cancel`, { method: "PUT", headers: authHeader() });
     if (!res.ok) {
       const data = await res.json().catch(() => ({ message: "ยกเลิกไม่สำเร็จ" }));
       showPopup(data.message || "ยกเลิกไม่สำเร็จ", { type: "error" });

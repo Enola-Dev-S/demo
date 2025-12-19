@@ -355,7 +355,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
-import { API_BASE } from "@/config";
+import { API_BASE, authHeader } from "@/config";
 
 // helper: format date as YYYY-MM-DD in local timezone (avoid toISOString timezone shift)
 const pad = (n: number) => n.toString().padStart(2, "0");
@@ -529,7 +529,7 @@ const form = ref({
 const formErrors = ref<string[]>([]);
 
 const loadCars = async () => {
-  const res = await fetch(`${API_BASE}/api/car`);
+  const res = await fetch(`${API_BASE}/api/car`, { headers: authHeader() });
   const data = await res.json();
   cars.value = data.data || [];
   if (!form.value.car_id && cars.value.length) form.value.car_id = cars.value[0].id;
@@ -557,7 +557,7 @@ const loadWeek = async () => {
     filterCar.value
   );
 
-  const res = await fetch(`${API_BASE}/api/booking?${params.toString()}`);
+  const res = await fetch(`${API_BASE}/api/booking?${params.toString()}`, { headers: authHeader() });
   const data = await res.json();
   bookings.value = data.data || [];
   console.log("[BookingWeekly] bookings fetched:", bookings.value.length);
@@ -741,7 +741,7 @@ const cancelBooking = async (b: any) => {
 };
 
 const viewHistory = async (car: any) => {
-  const res = await fetch(`${API_BASE}/api/booking/car/${car.id}/history`);
+  const res = await fetch(`${API_BASE}/api/booking/car/${car.id}/history`, { headers: authHeader() });
   const data = await res.json();
   history.value = data.data || [];
   historyCar.value = car;
@@ -781,7 +781,7 @@ const smallFormat = (iso?: string) => {
 // perform cancel without built-in confirm (used by modal)
 const performCancel = async (b: any) => {
   try {
-    const res = await fetch(`${API_BASE}/api/booking/${b.id}/cancel`, { method: "PUT" });
+    const res = await fetch(`${API_BASE}/api/booking/${b.id}/cancel`, { method: "PUT", headers: authHeader() });
     if (!res.ok) {
       const data = await res.json().catch(() => ({ message: "ยกเลิกไม่สำเร็จ" }));
       showPopup(data.message || "ยกเลิกไม่สำเร็จ", { type: "error" });

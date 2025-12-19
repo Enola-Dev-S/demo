@@ -2,10 +2,10 @@
   <div :class="isMobile ? 'w-full bg-gray-100 h-[calc(100dvh-80px)] flex flex-col' : 'p-2 w-full bg-gray-100 rounded-xl'">
     <!-- Header -->
     <div
-      class="flex-none flex flex-col xl:flex-row justify-between items-center gap-4 mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100"
+      class="flex-none flex flex-col lg:flex-row justify-between items-center gap-4 mb-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100"
     >
       <!-- Navigation Group -->
-      <div class="flex flex-col md:flex-row items-center gap-4 w-full xl:w-auto">
+      <div class="flex flex-col md:flex-row items-center gap-4 w-full lg:w-auto">
         <div class="flex items-center bg-gray-100 p-1 rounded-xl w-full md:w-auto justify-between md:justify-start">
           <button
             @click="prevWeek"
@@ -72,16 +72,17 @@
 
       <!-- Actions Group -->
        
-      <div class="flex flex-col md:flex-row items-center gap-3 w-full xl:w-auto justify-end">
+      <div class="flex flex-col md:flex-row items-center gap-3 w-full lg:w-auto justify-end">
         <div class="flex w-full md:w-auto gap-3">
+          <span v-if="!isMobile" class="text-sm font-medium text-gray-500 my-auto">Resolution</span>
           <!-- Select resolution -->
           <select
             v-if="!isMobile"
             v-model="resolution"
             class="flex-1 md:flex-none appearance-none pl-4 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-gray-300 focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition-all cursor-pointer min-w-[100px]"
           >
-            <option value="Small">เล็ก</option>
-            <option value="Large">ใหญ่</option>
+            <option value="Small">Small</option>
+            <option value="Large">Large</option>
           </select>   
           
           <div class="relative group flex-1 md:flex-none">
@@ -125,7 +126,7 @@
           </div>
         </div>
 
-        <div class="h-8 w-px bg-gray-200 hidden xl:block mx-1"></div>
+        <div class="h-8 w-px bg-gray-200 hidden lg:block mx-1"></div>
 
         <div class="flex w-full md:w-auto gap-3">
           <button
@@ -201,7 +202,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
-import { API_BASE } from "@/config";
+import { API_BASE, authHeader } from "@/config";
 import BookingSmall from "./BookingWeekly copy 22.vue";
 import BookingLarge from "./BookingWeekly copy 33.vue";
 import BookingMobile from "./BookingMobile.vue";
@@ -278,7 +279,7 @@ const cars = ref<any[]>([]);
 const filterCar = ref<string | number>("");
 
 const loadCars = async () => {
-  const res = await fetch(`${API_BASE}/api/car`);
+  const res = await fetch(`${API_BASE}/api/car`, { headers: authHeader() });
   const data = await res.json();
   cars.value = data.data || [];
 };

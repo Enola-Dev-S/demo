@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3210:3210"
+    environment:
+      - TZ=Asia/Bangkok
+    env_file:
+      - .env
+    volumes:
+      - ./imgcar:/app/imgcar
+    restart: unless-stopped
